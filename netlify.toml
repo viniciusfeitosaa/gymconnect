@@ -1,8 +1,8 @@
 [build]
-  base = "."
-  command = "chmod +x build.sh && ./build.sh"
-  publish = "client/build"
-  functions = "client/netlify/functions"
+  base = "client"
+  command = "npm install && npm run build"
+  publish = "build"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
