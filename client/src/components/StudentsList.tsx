@@ -1,0 +1,470 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Copy, Check, Users, Search, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
+
+interface Student {
+  id: string;
+  name: string;
+  accessCode: string;
+  created_at: string;
+}
+
+const StudentsList: React.FC = () => {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get('/api/students');
+      setStudents(response.data);
+      setLoading(false);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Erro ao carregar alunos');
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (err) {
+      // Erro ao copiar para área de transferência
+    }
+  };
+
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.accessCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid rgba(59, 130, 246, 0.3)',
+          borderTop: '3px solid #3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{
+        textAlign: 'center',
+        padding: '2rem'
+      }}>
+        <div style={{
+          color: '#fca5a5',
+          fontSize: '1.125rem',
+          marginBottom: '1rem'
+        }}>
+          {error}
+        </div>
+        <button
+          onClick={fetchStudents}
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+            color: 'white',
+            border: 'none',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: '500'
+          }}
+        >
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      padding: '2rem',
+      maxWidth: '1200px',
+      margin: '0 auto'
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          <Link
+            to="/dashboard"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#e2e8f0';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+            }}
+          >
+            <ArrowLeft size={16} />
+            Voltar ao Dashboard
+          </Link>
+        </div>
+
+        <Link
+          to="/dashboard/students/new"
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '0.75rem',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: '600',
+            transition: 'all 0.3s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <Plus size={20} />
+          Adicionar Aluno
+        </Link>
+      </div>
+
+      {/* Título e estatísticas */}
+      <div style={{
+        marginBottom: '2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '4rem',
+          height: '4rem',
+          borderRadius: '1rem',
+          background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+          marginBottom: '1rem'
+        }}>
+          <Users size={24} color="white" />
+        </div>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '0.5rem'
+        }}>
+          Gerenciar Alunos
+        </h1>
+        <p style={{
+          color: '#94a3b8',
+          fontSize: '1rem'
+        }}>
+          {students.length} aluno{students.length !== 1 ? 's' : ''} cadastrado{students.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Barra de pesquisa */}
+      <div style={{
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          position: 'relative',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}>
+          <div style={{
+            position: 'absolute',
+            left: '1rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#64748b'
+          }}>
+            <Search size={20} />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nome ou código de acesso..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem 0.75rem 3rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '0.75rem',
+              color: 'white',
+              fontSize: '1rem',
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Lista de alunos */}
+      {filteredStudents.length === 0 ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '4rem 2rem',
+          backgroundColor: 'rgba(2, 6, 23, 0.6)',
+          borderRadius: '1rem',
+          border: '1px solid rgba(59, 130, 246, 0.2)'
+        }}>
+          <Users size={48} color="#64748b" style={{ marginBottom: '1rem' }} />
+          <h3 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#94a3b8',
+            marginBottom: '0.5rem'
+          }}>
+            Nenhum aluno encontrado
+          </h3>
+          <p style={{
+            color: '#64748b',
+            fontSize: '0.875rem'
+          }}>
+            {searchTerm ? 'Tente ajustar os termos de busca.' : 'Comece adicionando seu primeiro aluno.'}
+          </p>
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: '1.5rem'
+        }}>
+          {filteredStudents.map((student) => (
+            <div
+              key={student.id}
+              style={{
+                backgroundColor: 'rgba(2, 6, 23, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+              }}
+            >
+              {/* Header do card */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '1rem'
+              }}>
+                <div>
+                  <h3 style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: 'white',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {student.name}
+                  </h3>
+                  <p style={{
+                    color: '#64748b',
+                    fontSize: '0.75rem'
+                  }}>
+                    Cadastrado em {formatDate(student.created_at)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Código de acesso */}
+              <div style={{
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                padding: '0.75rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{
+                      color: '#94a3b8',
+                      fontSize: '0.75rem',
+                      marginBottom: '0.25rem'
+                    }}>
+                      Código de Acesso
+                    </div>
+                    <div style={{
+                      color: 'white',
+                      fontFamily: 'monospace',
+                      fontSize: '1rem',
+                      fontWeight: '600'
+                    }}>
+                      {student.accessCode}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(student.accessCode)}
+                    style={{
+                      background: copiedCode === student.accessCode 
+                        ? 'rgba(34, 197, 94, 0.2)' 
+                        : 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid',
+                      borderColor: copiedCode === student.accessCode 
+                        ? 'rgba(34, 197, 94, 0.4)' 
+                        : 'rgba(59, 130, 246, 0.3)',
+                      color: copiedCode === student.accessCode ? '#4ade80' : '#60a5fa',
+                      padding: '0.5rem',
+                      borderRadius: '0.375rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (copiedCode !== student.accessCode) {
+                        e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (copiedCode !== student.accessCode) {
+                        e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                      }
+                    }}
+                  >
+                    {copiedCode === student.accessCode ? (
+                      <Check size={16} />
+                    ) : (
+                      <Copy size={16} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Ações */}
+              <div style={{
+                display: 'flex',
+                gap: '0.75rem'
+              }}>
+                <Link
+                  to={`/dashboard/students/${student.id}/workouts`}
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                    color: 'white',
+                    padding: '0.75rem',
+                    borderRadius: '0.5rem',
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  Ver Treinos
+                </Link>
+                
+                <Link
+                  to={`/dashboard/students/${student.id}/workouts/create`}
+                  style={{
+                    flex: 1,
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    color: 'white',
+                    padding: '0.75rem',
+                    borderRadius: '0.5rem',
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                  }}
+                >
+                  Criar Treino
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default StudentsList;

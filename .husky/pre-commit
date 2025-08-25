@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Executando linting..."
+cd client && npm run lint
+cd ../server && npm run lint
+
+echo "✅ Linting concluído!"

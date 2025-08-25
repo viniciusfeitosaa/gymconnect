@@ -1,0 +1,27 @@
+{
+  "name": "gymconnect",
+  "version": "1.0.0",
+  "description": "App web para personal trainers gerenciarem alunos e treinos",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "lint:fix": "npm run lint:fix:server && npm run lint:fix:client",
+    "lint:fix:server": "cd server && npm run lint:fix",
+    "lint:fix:client": "cd client && npm run lint:fix",
+    "test": "cd client && npm test",
+    "test:coverage": "cd client && npm run test:coverage"
+  },
+  "keywords": ["gym", "personal", "trainer", "workout"],
+  "author": "GymConnect",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
