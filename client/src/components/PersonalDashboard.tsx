@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, Routes, Route } from 'react-router-dom';
-import { LogOut, Plus, Users, Dumbbell, BarChart3, Settings, Menu, X } from 'lucide-react';
+import { LogOut, Plus, Users, Dumbbell, BarChart3, Menu } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import StudentsList from './StudentsList';
 import CreateWorkout from './CreateWorkout';

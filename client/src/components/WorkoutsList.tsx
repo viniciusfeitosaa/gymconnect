@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Calendar, Clock, Dumbbell, User, Eye, Edit, Trash2 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Plus, Calendar, Clock, Dumbbell, User, Eye, Edit } from 'lucide-react';
 import axios from 'axios';
 
 interface Workout {
@@ -19,7 +19,6 @@ interface Student {
 
 const WorkoutsList: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
-  const navigate = useNavigate();
   const [student, setStudent] = useState<Student | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
