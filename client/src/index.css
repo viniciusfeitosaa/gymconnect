@@ -1,16 +1,3 @@
-/* Test CSS - Remove this and uncomment Tailwind below */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Uncomment these lines after confirming CSS is working */
-/*
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -41,7 +28,6 @@ body {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
-*/
 
 /* Smooth scrolling */
 html {
