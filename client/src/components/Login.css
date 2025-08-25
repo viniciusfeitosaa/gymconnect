@@ -1,0 +1,23 @@
+/* Responsividade para Login */
+
+/* Mobile First */
+.login-container {
+  padding: 0 1rem;
+}
+
+.login-form {
+  padding: 1.5rem;
+  margin: 0 1rem;
+}
+
+/* Tablet e Desktop */
+@media (min-width: 768px) {
+  .login-container {
+    padding: 0;
+  }
+  
+  .login-form {
+    padding: 2rem;
+    margin: 0;
+  }
+}

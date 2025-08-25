@@ -1,0 +1,23 @@
+/* Responsividade para Register */
+
+/* Mobile First */
+.register-container {
+  padding: 0 1rem;
+}
+
+.register-form {
+  padding: 1.5rem;
+  margin: 0 1rem;
+}
+
+/* Tablet e Desktop */
+@media (min-width: 768px) {
+  .register-container {
+    padding: 0;
+  }
+  
+  .register-form {
+    padding: 2rem;
+    margin: 0;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Dumbbell, Smartphone } from 'lucide-react';
+import './StudentAccess.css';
 
 const StudentAccess: React.FC = () => {
   const [accessCode, setAccessCode] = useState('');
@@ -96,7 +97,7 @@ const StudentAccess: React.FC = () => {
         Voltar
       </button>
 
-      <div style={{
+      <div className="student-access-container" style={{
         width: '100%',
         maxWidth: '500px',
         position: 'relative',
@@ -142,12 +143,11 @@ const StudentAccess: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div style={{
+        <div className="student-access-form" style={{
           backgroundColor: 'rgba(2, 6, 23, 0.95)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1.5rem',
-          padding: '2.5rem',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
         }}>
           {error && (

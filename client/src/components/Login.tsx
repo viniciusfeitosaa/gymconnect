@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Dumbbell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import './Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -59,7 +60,7 @@ const Login: React.FC = () => {
         animation: 'pulse 4s ease-in-out infinite alternate-reverse'
       }}></div>
 
-      <div style={{
+      <div className="login-container" style={{
         width: '100%',
         maxWidth: '400px',
         position: 'relative',
@@ -102,12 +103,11 @@ const Login: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div style={{
+        <div className="login-form" style={{
           backgroundColor: 'rgba(2, 6, 23, 0.95)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1.5rem',
-          padding: '2rem',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
         }}>
           {error && (

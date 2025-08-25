@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, User, Dumbbell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import './Register.css';
 
 const Register: React.FC = () => {
   const [name, setName] = useState('');
@@ -68,7 +69,7 @@ const Register: React.FC = () => {
         animation: 'pulse 4s ease-in-out infinite alternate-reverse'
       }}></div>
 
-      <div style={{
+      <div className="register-container" style={{
         width: '100%',
         maxWidth: '450px',
         position: 'relative',
@@ -111,12 +112,11 @@ const Register: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div style={{
+        <div className="register-form" style={{
           backgroundColor: 'rgba(2, 6, 23, 0.95)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1.5rem',
-          padding: '2rem',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
         }}>
           {error && (

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import StudentsList from './StudentsList';
 import CreateWorkout from './CreateWorkout';
 import WorkoutsList from './WorkoutsList';
+import './PersonalDashboard.css';
 
 // Componente da página inicial do dashboard
 interface Student {
@@ -41,8 +42,7 @@ const DashboardHome: React.FC = () => {
   }, []);
 
   return (
-    <div style={{
-      padding: '2rem',
+    <div className="dashboard-container" style={{
       maxWidth: '1200px',
       margin: '0 auto'
     }}>
@@ -51,8 +51,7 @@ const DashboardHome: React.FC = () => {
         marginBottom: '3rem',
         textAlign: 'center'
       }}>
-        <h1 style={{
-          fontSize: '2.5rem',
+        <h1 className="dashboard-title" style={{
           fontWeight: 'bold',
           background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
           WebkitBackgroundClip: 'text',
@@ -70,19 +69,15 @@ const DashboardHome: React.FC = () => {
       </div>
 
       {/* Cards de estatísticas */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '2rem',
-        marginBottom: '3rem'
+      <div className="dashboard-stats-grid" style={{
+        display: 'grid'
       }}>
         {/* Card Total de Alunos */}
-        <div style={{
+        <div className="dashboard-stat-card" style={{
           backgroundColor: 'rgba(2, 6, 23, 0.8)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1rem',
-          padding: '2rem',
           textAlign: 'center',
           transition: 'all 0.3s'
         }}
