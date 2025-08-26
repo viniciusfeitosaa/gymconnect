@@ -18,10 +18,20 @@
     "test": "cd client && npm test",
     "test:coverage": "cd client && npm run test:coverage"
   },
-  "keywords": ["gym", "personal", "trainer", "workout"],
+  "keywords": [
+    "gym",
+    "personal",
+    "trainer",
+    "workout"
+  ],
   "author": "GymConnect",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3"
   }
 }
