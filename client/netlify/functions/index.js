@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
 
       switch (resource) {
         case 'auth':
-          return await handleAuth(event, headers);
+          return await handleAuth(event, headers, id, action);
         case 'users':
           return await handleUsers(event, headers, id);
         case 'students':
@@ -71,8 +71,9 @@ exports.handler = async (event, context) => {
 };
 
 // Função para autenticação
-async function handleAuth(event, headers) {
-  if (event.httpMethod === 'POST') {
+async function handleAuth(event, headers, id, action) {
+  // Login
+  if (event.httpMethod === 'POST' && !id) {
     const { email, password } = JSON.parse(event.body);
     
     try {
@@ -122,6 +123,100 @@ async function handleAuth(event, headers) {
         body: JSON.stringify({ error: 'Credenciais inválidas' })
       };
     } catch (error) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: error.message })
+      };
+    }
+  }
+
+  // Register
+  if (event.httpMethod === 'POST' && id === 'register') {
+    const { name, email, password } = JSON.parse(event.body);
+    
+    try {
+      // Hash da senha com bcrypt
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
+      const result = await pool.query(
+        'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
+        [name, email, hashedPassword]
+      );
+      
+      // Gerar JWT token
+      const token = jwt.sign(
+        { userId: result.rows[0].id, email: result.rows[0].email },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '24h' }
+      );
+      
+      return {
+        statusCode: 201,
+        headers,
+        body: JSON.stringify({
+          user: result.rows[0],
+          token
+        })
+      };
+    } catch (error) {
+      if (error.code === '23505') { // Unique violation
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Email já cadastrado' })
+        };
+      }
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: error.message })
+      };
+    }
+  }
+
+  // Get current user (me)
+  if (event.httpMethod === 'GET' && id === 'me') {
+    try {
+      const authHeader = event.headers.authorization || event.headers.Authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Token não fornecido' })
+        };
+      }
+
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+      
+      const result = await pool.query(
+        'SELECT id, name, email FROM users WHERE id = $1',
+        [decoded.userId]
+      );
+
+      if (result.rows.length === 0) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ error: 'Usuário não encontrado' })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ user: result.rows[0] })
+      };
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Token inválido' })
+        };
+      }
       return {
         statusCode: 500,
         headers,
