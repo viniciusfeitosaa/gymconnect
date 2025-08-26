@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Configuração do pool de conexões PostgreSQL
 const pool = new Pool({
@@ -88,9 +90,18 @@ async function handleAuth(event, headers) {
       }
 
       const user = result.rows[0];
-      // Aqui você deve verificar a senha com bcrypt
-      // Por enquanto, vamos simular uma verificação simples
-      if (password === user.password_hash) { // Em produção, use bcrypt.compare
+      
+      // Verificar senha com bcrypt
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      
+      if (isValidPassword) {
+        // Gerar JWT token
+        const token = jwt.sign(
+          { userId: user.id, email: user.email },
+          process.env.JWT_SECRET || 'fallback-secret',
+          { expiresIn: '24h' }
+        );
+        
         return {
           statusCode: 200,
           headers,
@@ -99,7 +110,8 @@ async function handleAuth(event, headers) {
               id: user.id,
               name: user.name,
               email: user.email
-            }
+            },
+            token
           })
         };
       }
@@ -131,9 +143,13 @@ async function handleUsers(event, headers, id) {
     const { name, email, password } = JSON.parse(event.body);
     
     try {
+      // Hash da senha com bcrypt
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
       const result = await pool.query(
         'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
-        [name, email, password] // Em produção, hash a senha com bcrypt
+        [name, email, hashedPassword]
       );
       
       return {
