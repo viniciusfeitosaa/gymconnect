@@ -58,6 +58,19 @@ let students = [
 app.use(cors());
 app.use(express.json());
 
+// Middleware de logging para debug
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, {
+    body: req.body,
+    query: req.query,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'authorization': req.headers['authorization'] ? 'Bearer ***' : undefined
+    }
+  });
+  next();
+});
+
 // Middleware de autenticação JWT
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -85,89 +98,115 @@ app.get('/api/test', (req, res) => {
 
 // Rota para registro de novos personais
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password } = req.body;
-  
-  // Validações básicas
-  if (!name || !email || !password) {
-    return res.status(400).json({ 
-      error: 'Nome, email e senha são obrigatórios' 
-    });
-  }
-  
-  // Verificar se o email já existe
-  const existingPersonal = personals.find(p => p.email === email);
-  if (existingPersonal) {
-    return res.status(400).json({ 
-      error: 'Email já cadastrado' 
-    });
-  }
-  
-  // Hash da senha com bcrypt
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  
-  // Criar novo personal
-  const newPersonal = {
-    id: Date.now().toString(),
-    name,
-    email,
-    password: hashedPassword,
-    createdAt: new Date().toISOString().split('T')[0]
-  };
-  
-  // Adicionar à lista
-  personals.push(newPersonal);
-  
-  console.log('Novo personal registrado:', { name, email });
-  
-  res.status(201).json({ 
-    message: 'Personal registrado com sucesso',
-    personal: {
-      id: newPersonal.id,
-      name: newPersonal.name,
-      email: newPersonal.email,
-      createdAt: newPersonal.createdAt
+  try {
+    const { name, email, password } = req.body;
+    
+    console.log('Tentativa de registro:', { name, email, hasPassword: !!password });
+    
+    // Validações básicas
+    if (!name || !email || !password) {
+      console.log('Validação falhou:', { name: !!name, email: !!email, password: !!password });
+      return res.status(400).json({ 
+        error: 'Nome, email e senha são obrigatórios' 
+      });
     }
-  });
+    
+    // Verificar se o email já existe
+    const existingPersonal = personals.find(p => p.email === email);
+    if (existingPersonal) {
+      console.log('Email já existe:', email);
+      return res.status(400).json({ 
+        error: 'Email já cadastrado' 
+      });
+    }
+    
+    // Hash da senha com bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    // Criar novo personal
+    const newPersonal = {
+      id: Date.now().toString(),
+      name,
+      email,
+      password: hashedPassword,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    
+    // Adicionar à lista
+    personals.push(newPersonal);
+    
+    console.log('Novo personal registrado com sucesso:', { name, email, id: newPersonal.id });
+    
+    res.status(201).json({ 
+      message: 'Personal registrado com sucesso',
+      personal: {
+        id: newPersonal.id,
+        name: newPersonal.name,
+        email: newPersonal.email,
+        createdAt: newPersonal.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Erro no registro:', error);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor ao criar conta',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
 // Rota para login de personais
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  
-  // Encontrar o personal pelo email
-  const personal = personals.find(p => p.email === email);
-  
-  if (!personal) {
-    return res.status(401).json({ error: 'Email não encontrado' });
+  try {
+    const { email, password } = req.body;
+    
+    console.log('Tentativa de login:', { email, hasPassword: !!password });
+    
+    // Encontrar o personal pelo email
+    const personal = personals.find(p => p.email === email);
+    
+    if (!personal) {
+      console.log('Email não encontrado:', email);
+      return res.status(401).json({ error: 'Email não encontrado' });
+    }
+    
+    // Verificar senha com bcrypt
+    const isValidPassword = await bcrypt.compare(password, personal.password);
+    
+    if (!isValidPassword) {
+      console.log('Senha incorreta para:', email);
+      return res.status(401).json({ error: 'Senha incorreta' });
+    }
+    
+    // Gerar token JWT real
+    const token = jwt.sign(
+      { 
+        id: personal.id, 
+        email: personal.email,
+        name: personal.name 
+      }, 
+      JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
+    
+    console.log('Login bem-sucedido:', { email, id: personal.id });
+    
+    res.json({
+      user: {
+        id: personal.id,
+        name: personal.name,
+        email: personal.email
+      },
+      token: token
+    });
+  } catch (error) {
+    console.error('Erro no login:', error);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor ao fazer login',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
-  
-  // Verificar senha com bcrypt
-  const isValidPassword = await bcrypt.compare(password, personal.password);
-  
-  if (!isValidPassword) {
-    return res.status(401).json({ error: 'Senha incorreta' });
-  }
-  
-  // Gerar token JWT real
-  const token = jwt.sign(
-    { 
-      id: personal.id, 
-      email: personal.email,
-      name: personal.name 
-    }, 
-    JWT_SECRET, 
-    { expiresIn: '24h' }
-  );
-  
-  res.json({
-    user: {
-      id: personal.id,
-      name: personal.name,
-      email: personal.email
-    },
-    token: token
-  });
 });
 
 // Rota para estatísticas do dashboard (PROTEGIDA)
@@ -441,4 +480,13 @@ app.listen(PORT, () => {
   console.log(`📱 Frontend: http://localhost:3000`);
   console.log(`🔧 Backend: http://localhost:${PORT}`);
   console.log(`📊 API Test: http://localhost:${PORT}/api/test`);
+  console.log(`🔍 Modo debug ativado - todos os logs serão exibidos`);
+}).on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Erro: Porta ${PORT} já está em uso`);
+    console.error('💡 Solução: Pare outros processos Node.js ou mude a porta');
+  } else {
+    console.error('❌ Erro ao iniciar servidor:', error);
+  }
+  process.exit(1);
 });

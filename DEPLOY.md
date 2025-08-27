@@ -1,183 +1,283 @@
-# 🚀 Guia de Deploy - GymConnect no Netlify
+# 🚀 Deploy para Produção - GymConnect
+
+Este documento explica como fazer o deploy da aplicação GymConnect para produção de forma segura e confiável.
 
 ## 📋 Pré-requisitos
 
-- ✅ Conta no [Netlify](https://netlify.com) (gratuita)
-- ✅ Conta no [Neon](https://neon.tech) (gratuita)
-- ✅ Git configurado no projeto
-- ✅ Node.js 16+ instalado
+- ✅ Node.js 18+ instalado
+- ✅ npm ou yarn instalado
+- ✅ PM2 instalado globalmente (`npm install -g pm2`)
+- ✅ Git configurado (para deploy automático)
 
-## 🗄️ Configurar Banco Neon
+## 🔧 Scripts Disponíveis
 
-### 1. Acessar o Neon Dashboard
-- Faça login em [neon.tech](https://neon.tech)
-- Acesse seu projeto `neondb`
-
-### 2. Executar o Schema SQL
-- Vá para a aba "SQL Editor"
-- Copie e cole o conteúdo de `database/schema.sql`
-- Execute o script para criar as tabelas
-
-### 3. Verificar a String de Conexão
-```
-postgresql://neondb_owner:npg_CB1LSdDMrE2J@ep-crimson-mountain-aeg7vggf-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-```
-
-## 🛠️ Configurar Projeto Local
-
-### 1. Instalar Dependências
+### **Desenvolvimento**
 ```bash
-cd client
-npm install
-npm install -g netlify-cli
-```
+# Desenvolvimento com backend e frontend simultâneos
+npm run dev:full
 
-### 2. Configurar Variáveis de Ambiente
-Crie um arquivo `.env.local` na pasta `client/`:
-```bash
-# Database
-DATABASE_URL=postgresql://neondb_owner:npg_CB1LSdDMrE2J@ep-crimson-mountain-aeg7vggf-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+# Desenvolvimento sequencial (recomendado)
+npm run dev:wait
 
-# JWT Secret
-JWT_SECRET=gymconnect_super_secret_jwt_key_2024
-
-# Environment
-NODE_ENV=development
-```
-
-### 3. Testar Localmente
-```bash
+# Apenas backend
 npm run dev
+
+# Apenas frontend
+npm run client
 ```
-Isso iniciará o Netlify Dev com suas funções locais.
 
-## 🌐 Deploy no Netlify
-
-### 1. Conectar ao Netlify
+### **Produção**
 ```bash
-netlify login
+# Build do frontend
+npm run build
+
+# Iniciar servidor de produção
+npm run start:production
+
+# Build completo + produção
+npm run build:full
 ```
 
-### 2. Inicializar Projeto
+## 🚀 Deploy Automático
+
+### **Linux/macOS**
 ```bash
-netlify init
-```
-- Escolha "Create & configure a new site"
-- Escolha sua equipe
-- Escolha um nome para o site (ex: `gymconnect-app`)
+# Dar permissão de execução
+chmod +x deploy-production.sh
 
-### 3. Configurar Build Settings
-No dashboard do Netlify, configure:
-- **Build command**: `npm run build`
-- **Publish directory**: `build`
-- **Functions directory**: `netlify/functions`
-
-### 4. Configurar Variáveis de Ambiente
-No dashboard do Netlify, vá em **Site settings > Environment variables**:
-```
-DATABASE_URL = postgresql://neondb_owner:npg_CB1LSdDMrE2J@ep-crimson-mountain-aeg7vggf-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-JWT_SECRET = gymconnect_super_secret_jwt_key_2024
-NODE_ENV = production
+# Executar deploy
+./deploy-production.sh
 ```
 
-### 5. Deploy Automático
+### **Windows (PowerShell)**
+```powershell
+# Executar como administrador
+.\deploy-production.ps1
+
+# Com parâmetros
+.\deploy-production.ps1 -Environment production -Force
+```
+
+## 📁 Estrutura de Arquivos de Produção
+
+```
+GymConnect/
+├── start-production.js      # Servidor de produção otimizado
+├── ecosystem.config.js      # Configuração PM2
+├── deploy-production.sh     # Script de deploy (Linux/macOS)
+├── deploy-production.ps1    # Script de deploy (Windows)
+├── logs/                    # Diretório de logs
+├── client/build/            # Frontend buildado
+└── package.json            # Dependências e scripts
+```
+
+## 🔍 Características do Servidor de Produção
+
+### **✅ Verificação de Backend**
+- Aguarda o backend estar funcionando antes de servir o frontend
+- Health check automático na rota `/api/health`
+- Timeout configurável (30 segundos padrão)
+
+### **✅ Tratamento de Erros Robusto**
+- Try-catch em todas as rotas
+- Logs estruturados para produção
+- Graceful shutdown com SIGTERM/SIGINT
+
+### **✅ Monitoramento e Logs**
+- Logs com timestamp e IP do cliente
+- Rota de health check detalhada
+- Monitoramento PM2 integrado
+
+### **✅ Segurança**
+- CORS configurado
+- JWT com expiração configurável
+- Validação de entrada em todas as rotas
+
+## 📊 Monitoramento com PM2
+
+### **Comandos Básicos**
 ```bash
-git add .
-git commit -m "Configurar deploy Netlify"
-git push origin main
+# Ver status
+pm2 status
+
+# Ver logs em tempo real
+pm2 logs gymconnect-production
+
+# Monitoramento interativo
+pm2 monit
+
+# Reiniciar aplicação
+pm2 restart gymconnect-production
+
+# Parar aplicação
+pm2 stop gymconnect-production
 ```
 
-O Netlify detectará automaticamente as mudanças e fará o deploy.
+### **Configurações PM2**
+- **Auto-restart**: Sim
+- **Watch mode**: Não (produção)
+- **Memory limit**: 1GB
+- **Instâncias**: 1 (pode ser aumentado)
+- **Logs**: Rotacionados automaticamente
 
-## 🔧 Estrutura do Projeto
+## 🌍 Variáveis de Ambiente
 
+### **Obrigatórias**
+```bash
+NODE_ENV=production
+PORT=3001
 ```
-client/
-├── src/                    # Código React
-├── netlify/
-│   ├── functions/         # Netlify Functions
-│   │   └── index.js      # API principal
-│   └── netlify.toml      # Configuração Netlify
-├── package.json
-└── .env.local            # Variáveis locais
+
+### **Opcionais**
+```bash
+JWT_SECRET=sua-chave-secreta-aqui
 ```
 
-## 📡 Endpoints da API
+### **Configuração**
+```bash
+# Linux/macOS
+export NODE_ENV=production
+export JWT_SECRET=sua-chave-secreta
 
-### Autenticação
-- `POST /api/auth` - Login
+# Windows
+set NODE_ENV=production
+set JWT_SECRET=sua-chave-secreta
+```
 
-### Usuários
-- `POST /api/users` - Criar usuário
-- `GET /api/users` - Listar usuários
+## 🔄 Processo de Deploy
 
-### Alunos
-- `POST /api/students` - Criar aluno
-- `GET /api/students` - Listar alunos
-- `GET /api/students/:id` - Buscar aluno
+### **1. Preparação**
+```bash
+# Atualizar código
+git pull origin main
 
-### Treinos
-- `POST /api/workouts` - Criar treino
-- `GET /api/workouts` - Listar treinos
-- `GET /api/workouts/:id` - Buscar treinos do aluno
+# Instalar dependências
+npm install
+cd client && npm install && cd ..
+```
+
+### **2. Build**
+```bash
+# Build do frontend
+npm run build
+
+# Verificar build
+ls -la client/build/
+```
+
+### **3. Deploy**
+```bash
+# Executar script de deploy
+./deploy-production.sh
+
+# Ou manualmente
+pm2 start ecosystem.config.js --env production
+```
+
+### **4. Verificação**
+```bash
+# Verificar status
+pm2 status
+
+# Testar endpoints
+curl http://localhost:3001/api/health
+curl http://localhost:3001/api/test
+```
 
 ## 🚨 Troubleshooting
 
-### Erro de Conexão com Banco
-- Verifique se `DATABASE_URL` está correta
-- Confirme se o banco Neon está ativo
-- Teste a conexão localmente primeiro
+### **Problema: Porta já em uso**
+```bash
+# Verificar processos
+netstat -tulpn | grep :3001
 
-### Erro de Build
-- Verifique se todas as dependências estão instaladas
-- Confirme se o Node.js está na versão correta
-- Limpe o cache: `npm run build -- --reset-cache`
+# Parar processos
+pm2 stop all
+pm2 delete all
+```
 
-### Erro de Functions
-- Verifique se as variáveis de ambiente estão configuradas
-- Confirme se o arquivo `netlify.toml` está correto
-- Teste localmente com `netlify dev`
+### **Problema: Backend não responde**
+```bash
+# Verificar logs
+pm2 logs gymconnect-production
+
+# Reiniciar
+pm2 restart gymconnect-production
+```
+
+### **Problema: Frontend não carrega**
+```bash
+# Verificar build
+ls -la client/build/
+
+# Verificar logs do servidor
+pm2 logs gymconnect-production
+```
+
+## 📈 Monitoramento e Alertas
+
+### **Health Checks**
+- **Endpoint**: `/api/health`
+- **Frequência**: A cada 30 segundos
+- **Timeout**: 10 segundos
+
+### **Métricas Disponíveis**
+- Uptime do servidor
+- Uso de memória
+- Status das rotas
+- Tempo de resposta
+
+### **Logs Estruturados**
+- Timestamp ISO
+- Método HTTP
+- Rota acessada
+- IP do cliente
+- Status da resposta
 
 ## 🔒 Segurança
 
-### Em Produção:
-- ✅ Use HTTPS (automático no Netlify)
-- ✅ Configure CORS adequadamente
-- ✅ Hash senhas com bcrypt
-- ✅ Use JWT para autenticação
-- ✅ Valide todas as entradas
-- ✅ Implemente rate limiting
+### **Headers de Segurança**
+- CORS configurado
+- Content-Type validation
+- JWT authentication
 
-### Variáveis Sensíveis:
-- ❌ Nunca commite `.env.local`
-- ✅ Use variáveis de ambiente do Netlify
-- ✅ Rotacione JWT_SECRET regularmente
+### **Rate Limiting**
+- Implementar se necessário
+- Configurável por rota
 
-## 📊 Monitoramento
-
-### Logs
-- Acesse **Functions > Logs** no dashboard Netlify
-- Monitore erros e performance
-
-### Métricas
-- **Analytics** para tráfego
-- **Functions** para uso de API
-- **Forms** se implementar formulários
-
-## 🎯 Próximos Passos
-
-1. **Implementar autenticação JWT**
-2. **Adicionar validação de dados**
-3. **Implementar upload de imagens**
-4. **Adicionar testes automatizados**
-5. **Configurar CI/CD pipeline**
+### **Validação de Entrada**
+- Sanitização de dados
+- Validação de tipos
+- Proteção contra SQL injection
 
 ## 📞 Suporte
 
-- **Netlify Docs**: [docs.netlify.com](https://docs.netlify.com)
-- **Neon Docs**: [neon.tech/docs](https://neon.tech/docs)
-- **Issues**: Abra uma issue no repositório
+### **Logs de Debug**
+```bash
+# Ver logs detalhados
+pm2 logs gymconnect-production --lines 100
+
+# Filtrar por erro
+pm2 logs gymconnect-production | grep ERROR
+```
+
+### **Testes de Conectividade**
+```bash
+# Testar backend
+curl -v http://localhost:3001/api/health
+
+# Testar frontend
+curl -v http://localhost:3001/
+```
+
+## 🎯 Próximos Passos
+
+1. **Configurar CI/CD** com GitHub Actions
+2. **Implementar backup automático** dos dados
+3. **Adicionar métricas** com Prometheus
+4. **Configurar alertas** com Slack/Email
+5. **Implementar rate limiting** para APIs públicas
 
 ---
 
-**🎉 Parabéns! Seu GymConnect está rodando no Netlify com banco Neon!**
+**✅ Sistema pronto para produção com zero downtime e restart automático!**
