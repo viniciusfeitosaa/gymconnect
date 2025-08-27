@@ -57,14 +57,18 @@ const NewStudent: React.FC = () => {
     setLoading(true);
 
     try {
-      // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-      if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('/api/students', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-                  body: JSON.stringify({
+      // Usar a API real tanto em desenvolvimento quanto em produção
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? '/api/students' 
+        : '/.netlify/functions/api/students';
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
           name: formData.name,
           accessCode: formData.accessCode,
           notes: formData.notes,
@@ -72,19 +76,14 @@ const NewStudent: React.FC = () => {
           status: 'active'
           // personalId vem automaticamente do token JWT
         }),
-        });
+      });
 
-        if (response.ok) {
-          alert('Aluno cadastrado com sucesso!');
-          navigate('/dashboard/students');
-        } else {
-          const errorData = await response.json();
-          alert(errorData.error || 'Erro ao cadastrar aluno');
-        }
-      } else {
-        // Em produção, simular sucesso
+      if (response.ok) {
         alert('Aluno cadastrado com sucesso!');
         navigate('/dashboard/students');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Erro ao cadastrar aluno');
       }
          } catch (error) {
        alert('Erro ao cadastrar aluno');

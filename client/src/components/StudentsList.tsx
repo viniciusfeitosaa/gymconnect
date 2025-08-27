@@ -27,60 +27,39 @@ const StudentsList: React.FC = () => {
 
   const fetchStudents = async () => {
     try {
-      // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-      if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('/api/students');
-        if (response.ok) {
-          const data = await response.json();
-          setStudents(data.students);
-        } else {
-          // Fallback para dados estáticos
-          loadStaticStudents();
+      setLoading(true);
+      // Usar a API real tanto em desenvolvimento quanto em produção
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? '/api/students' 
+        : '/.netlify/functions/api/students';
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStudents(data.students || []);
+      } else if (response.status === 401) {
+        // Token inválido ou expirado
+        console.error('Token inválido ou expirado');
+        setStudents([]);
       } else {
-        // Em produção, usar dados estáticos
-        loadStaticStudents();
+        console.error('Erro ao carregar alunos:', response.status);
+        setStudents([]);
       }
     } catch (error) {
-      // Fallback para dados estáticos
-      loadStaticStudents();
+      console.error('Erro ao carregar alunos:', error);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadStaticStudents = () => {
-    const staticStudents = [
-      {
-        id: '1',
-        name: 'Ana Beatriz',
-        accessCode: 'ANA001',
-        joinDate: '2024-01-15',
-        workoutCount: 3,
-        lastWorkout: '2024-01-20',
-        status: 'active'
-      },
-      {
-        id: '2',
-        name: 'Carlos Eduardo',
-        accessCode: 'CAR002',
-        joinDate: '2024-01-10',
-        workoutCount: 2,
-        lastWorkout: '2024-01-18',
-        status: 'active'
-      },
-      {
-        id: '3',
-        name: 'Fernanda Lima',
-        accessCode: 'FER003',
-        joinDate: '2024-01-12',
-        workoutCount: 2,
-        lastWorkout: '2024-01-19',
-        status: 'active'
-      }
-    ];
-    setStudents(staticStudents);
-  };
+
 
   const copyToClipboard = async (code: string) => {
     try {

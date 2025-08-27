@@ -30,69 +30,39 @@ const WorkoutsList: React.FC = () => {
   useEffect(() => {
     const fetchWorkouts = async () => {
       try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          const response = await fetch('/api/workouts');
-          if (response.ok) {
-            const data = await response.json();
-            setWorkouts(data.workouts);
-          } else {
-            // Fallback para dados estáticos
-            loadStaticWorkouts();
+        setLoading(true);
+        // Usar a API real tanto em desenvolvimento quanto em produção
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? '/api/workouts' 
+          : '/.netlify/functions/api/workouts';
+        
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
           }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setWorkouts(data.workouts || []);
+        } else if (response.status === 401) {
+          // Token inválido ou expirado
+          console.error('Token inválido ou expirado');
+          setWorkouts([]);
         } else {
-          // Em produção, usar dados estáticos
-          loadStaticWorkouts();
+          console.error('Erro ao carregar treinos:', response.status);
+          setWorkouts([]);
         }
-           } catch (error) {
-       // Fallback para dados estáticos
-       loadStaticWorkouts();
-     } finally {
+      } catch (error) {
+        console.error('Erro ao carregar treinos:', error);
+        setWorkouts([]);
+      } finally {
         setLoading(false);
       }
     };
 
-    const loadStaticWorkouts = () => {
-      const staticWorkouts = [
-        {
-          id: '1',
-          name: 'Treino A - Força Superior',
-          description: 'Foco em desenvolvimento de força para membros superiores',
-          studentName: 'Ana Beatriz',
-          studentAccessCode: 'ANA001',
-          created_at: '2024-01-15',
-          exercises: [
-            { id: 1, name: 'Supino Reto', sets: 4, reps: 8, weight: '60kg', rest: '2 min', notes: 'Manter ombros para trás' },
-            { id: 2, name: 'Remada Curvada', sets: 4, reps: 10, weight: '45kg', rest: '90 seg', notes: 'Costas retas' }
-          ]
-        },
-        {
-          id: '2',
-          name: 'Treino B - Inferiores',
-          description: 'Desenvolvimento de força para membros inferiores',
-          studentName: 'Carlos Eduardo',
-          studentAccessCode: 'CAR002',
-          created_at: '2024-01-17',
-          exercises: [
-            { id: 3, name: 'Agachamento Livre', sets: 4, reps: 8, weight: '80kg', rest: '3 min', notes: 'Joelhos alinhados' },
-            { id: 4, name: 'Leg Press', sets: 3, reps: 12, weight: '120kg', rest: '2 min', notes: 'Pés na largura dos ombros' }
-          ]
-        },
-        {
-          id: '3',
-          name: 'Treino C - Cardio e Core',
-          description: 'Treino de resistência cardiovascular e core',
-          studentName: 'Fernanda Lima',
-          studentAccessCode: 'FER003',
-          created_at: '2024-01-19',
-          exercises: [
-            { id: 5, name: 'Corrida na Esteira', sets: 1, reps: 1, rest: '5 min', notes: '20 minutos em ritmo moderado' },
-            { id: 6, name: 'Plank', sets: 3, reps: 1, rest: '60 seg', notes: '45 segundos cada' }
-          ]
-        }
-      ];
-      setWorkouts(staticWorkouts);
-    };
+
 
     fetchWorkouts();
   }, []);
@@ -100,18 +70,24 @@ const WorkoutsList: React.FC = () => {
   const handleDeleteWorkout = async (workoutId: string) => {
     if (window.confirm('Tem certeza que deseja excluir este treino? Esta ação não pode ser desfeita.')) {
       try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          const response = await fetch(`/api/workouts/${workoutId}`, { method: 'DELETE' });
-          if (response.ok) {
-            // Remover treino da lista local
-            setWorkouts(workouts.filter(workout => workout.id !== workoutId));
-          } else {
-            alert('Erro ao excluir treino');
+        // Usar a API real tanto em desenvolvimento quanto em produção
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? `/api/workouts/${workoutId}` 
+          : `/.netlify/functions/api/workouts/${workoutId}`;
+        
+        const response = await fetch(apiUrl, { 
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
           }
-        } else {
-          // Em produção, remover da lista local
+        });
+        
+        if (response.ok) {
+          // Remover treino da lista local
           setWorkouts(workouts.filter(workout => workout.id !== workoutId));
+        } else {
+          alert('Erro ao excluir treino');
         }
       } catch (error) {
         alert('Erro ao excluir treino');

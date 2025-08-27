@@ -35,24 +35,33 @@ const DashboardHome: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          const response = await fetch('/api/dashboard/stats');
-          if (response.ok) {
-            const data = await response.json();
-            setStats(data);
-          } else {
-            // Fallback para dados estáticos
-            loadStaticStats();
+        // Usar a API real tanto em desenvolvimento quanto em produção
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? '/api/dashboard/stats' 
+          : '/.netlify/functions/api/dashboard/stats';
+        
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
           }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else if (response.status === 401) {
+          // Token inválido ou expirado
+          console.error('Token inválido ou expirado');
+          loadStaticStats();
         } else {
-          // Em produção, usar dados estáticos
+          console.error('Erro ao carregar estatísticas:', response.status);
           loadStaticStats();
         }
-             } catch (error) {
-         // Fallback para dados estáticos
-         loadStaticStats();
-       }
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+        loadStaticStats();
+      }
     };
 
     const loadStaticStats = () => {
