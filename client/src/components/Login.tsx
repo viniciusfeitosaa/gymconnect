@@ -22,7 +22,7 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao fazer login');
+      setError(err.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
     }

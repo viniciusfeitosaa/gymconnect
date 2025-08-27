@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import { API_BASE_URL, setupAxiosInterceptors } from '../config/api';
 
 interface User {
   id: string;
@@ -34,13 +32,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Função para obter a URL da API baseada no ambiente
+  const getApiUrl = (endpoint: string): string => {
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? '/api' 
+      : '/.netlify/functions/api';
+    return `${baseUrl}${endpoint}`;
+  };
+
   useEffect(() => {
-    // Configurar interceptors do Axios
-    setupAxiosInterceptors(axios);
-    
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       checkAuth();
     } else {
       setLoading(false);
@@ -49,11 +51,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/me`);
-      setUser(response.data.user);
+      const response = await fetch(getApiUrl('/auth/me'), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        localStorage.removeItem('token');
+      }
     } catch (error) {
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }
@@ -61,33 +73,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-      const { token, user } = response.data;
+      const response = await fetch(getApiUrl('/auth/login'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao fazer login');
+      }
+
+      const data = await response.json();
+      const { token, user } = data;
       
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Erro ao fazer login');
+      throw new Error(error.message || 'Erro ao fazer login');
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password });
-      const { token, user } = response.data;
+      const response = await fetch(getApiUrl('/auth/register'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao criar conta');
+      }
+
+      const data = await response.json();
+      const { token, user } = data;
       
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Erro ao cadastrar');
+      throw new Error(error.message || 'Erro ao criar conta');
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 

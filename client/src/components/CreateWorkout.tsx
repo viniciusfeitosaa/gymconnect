@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
-import axios from 'axios';
 
 interface Exercise {
   name: string;
@@ -33,8 +32,24 @@ const CreateWorkout: React.FC = () => {
 
   const fetchStudent = useCallback(async () => {
     try {
-      const response = await axios.get('/api/students');
-      const currentStudent = response.data.find((s: any) => s.id === studentId);
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? '/api/students' 
+        : '/.netlify/functions/api/students';
+        
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao carregar dados do aluno');
+      }
+
+      const data = await response.json();
+      const currentStudent = data.find((s: any) => s.id === studentId);
       
       if (!currentStudent) {
         setError('Aluno não encontrado');
@@ -43,7 +58,7 @@ const CreateWorkout: React.FC = () => {
       
       setStudent(currentStudent);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar dados do aluno');
+      setError(err.message || 'Erro ao carregar dados do aluno');
     }
   }, [studentId]);
 
@@ -102,10 +117,27 @@ const CreateWorkout: React.FC = () => {
         exercises: exercises
       };
 
-      await axios.post(`/api/students/${studentId}/workouts`, workoutData);
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? `/api/students/${studentId}/workouts` 
+        : `/.netlify/functions/api/students/${studentId}/workouts`;
+        
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(workoutData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao criar treino');
+      }
+
       navigate(`/dashboard/students/${studentId}/workouts`);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao criar treino');
+      setError(err.message || 'Erro ao criar treino');
     } finally {
       setLoading(false);
     }

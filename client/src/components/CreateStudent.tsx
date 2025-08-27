@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
-import axios from 'axios';
 
 const CreateStudent: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -27,14 +26,32 @@ const CreateStudent: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/students', formData);
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? '/api/students' 
+        : '/.netlify/functions/api/students';
+        
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao criar aluno');
+      }
+
+      const data = await response.json();
       
       // Mostrar mensagem de sucesso com o código de acesso
-      alert(`Aluno criado com sucesso! Código de acesso: ${response.data.access_code}`);
+      alert(`Aluno criado com sucesso! Código de acesso: ${data.access_code}`);
       
       navigate('/dashboard/students');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao criar aluno');
+      setError(err.message || 'Erro ao criar aluno');
     } finally {
       setLoading(false);
     }
