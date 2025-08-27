@@ -25,38 +25,26 @@ export const getApiUrl = (endpoint: string): string => {
 // Configuração de interceptors para logs em desenvolvimento
 export const setupAxiosInterceptors = (axios: any) => {
   if (isDevelopment) {
-    // Log de requisições
+    // Log de requisições (apenas em desenvolvimento)
     axios.interceptors.request.use(
       (config: any) => {
-        console.log('🚀 API Request:', {
-          method: config.method?.toUpperCase(),
-          url: config.url,
-          data: config.data,
-        });
+        // Log removido para evitar problemas de ESLint em produção
         return config;
       },
       (error: any) => {
-        console.error('❌ API Request Error:', error);
+        // Log removido para evitar problemas de ESLint em produção
         return Promise.reject(error);
       }
     );
 
-    // Log de respostas
+    // Log de respostas (apenas em desenvolvimento)
     axios.interceptors.response.use(
       (response: any) => {
-        console.log('✅ API Response:', {
-          status: response.status,
-          url: response.config.url,
-          data: response.data,
-        });
+        // Log removido para evitar problemas de ESLint em produção
         return response;
       },
       (error: any) => {
-        console.error('❌ API Response Error:', {
-          status: error.response?.status,
-          url: error.config?.url,
-          message: error.response?.data?.error || error.message,
-        });
+        // Log removido para evitar problemas de ESLint em produção
         return Promise.reject(error);
       }
     );
