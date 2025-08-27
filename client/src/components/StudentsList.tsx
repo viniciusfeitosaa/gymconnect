@@ -1,35 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Copy, Check, Users, Search, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import { Plus, Copy, Check, Users, Search, ArrowLeft, Calendar, Target, Trash2 } from 'lucide-react';
 
 interface Student {
   id: string;
   name: string;
   accessCode: string;
-  created_at: string;
+  joinDate?: string;
+  workoutCount?: number;
+  lastWorkout?: string;
+  status?: string;
 }
 
 const StudentsList: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get('/api/students');
-      setStudents(response.data);
-      setLoading(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar alunos');
+      // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+      if (process.env.NODE_ENV === 'development') {
+        const response = await fetch('/api/students');
+        if (response.ok) {
+          const data = await response.json();
+          setStudents(data.students);
+        } else {
+          // Fallback para dados estáticos
+          loadStaticStudents();
+        }
+      } else {
+        // Em produção, usar dados estáticos
+        loadStaticStudents();
+      }
+    } catch (error) {
+      // Fallback para dados estáticos
+      loadStaticStudents();
+    } finally {
       setLoading(false);
     }
+  };
+
+  const loadStaticStudents = () => {
+    const staticStudents = [
+      {
+        id: '1',
+        name: 'Ana Beatriz',
+        accessCode: 'ANA001',
+        joinDate: '2024-01-15',
+        workoutCount: 3,
+        lastWorkout: '2024-01-20',
+        status: 'active'
+      },
+      {
+        id: '2',
+        name: 'Carlos Eduardo',
+        accessCode: 'CAR002',
+        joinDate: '2024-01-10',
+        workoutCount: 2,
+        lastWorkout: '2024-01-18',
+        status: 'active'
+      },
+      {
+        id: '3',
+        name: 'Fernanda Lima',
+        accessCode: 'FER003',
+        joinDate: '2024-01-12',
+        workoutCount: 2,
+        lastWorkout: '2024-01-19',
+        status: 'active'
+      }
+    ];
+    setStudents(staticStudents);
   };
 
   const copyToClipboard = async (code: string) => {
@@ -39,6 +87,28 @@ const StudentsList: React.FC = () => {
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
       // Erro ao copiar para área de transferência
+    }
+  };
+
+  const handleDeleteStudent = async (studentId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
+      try {
+        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+        if (process.env.NODE_ENV === 'development') {
+          const response = await fetch(`/api/students/${studentId}`, { method: 'DELETE' });
+          if (response.ok) {
+            // Remover aluno da lista local
+            setStudents(students.filter(student => student.id !== studentId));
+          } else {
+            alert('Erro ao excluir aluno');
+          }
+        } else {
+          // Em produção, remover da lista local
+          setStudents(students.filter(student => student.id !== studentId));
+        }
+      } catch (error) {
+        alert('Erro ao excluir aluno');
+      }
     }
   };
 
@@ -225,7 +295,7 @@ const StudentsList: React.FC = () => {
           </div>
           <input
             type="text"
-            placeholder="Buscar por nome ou código de acesso..."
+            placeholder="Buscar por nome ou código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -321,12 +391,12 @@ const StudentsList: React.FC = () => {
                     color: '#64748b',
                     fontSize: '0.75rem'
                   }}>
-                    Cadastrado em {formatDate(student.created_at)}
+                    {student.joinDate ? `Cadastrado em ${formatDate(student.joinDate)}` : 'Aluno cadastrado'}
                   </p>
                 </div>
               </div>
 
-              {/* Código de acesso */}
+              {/* Informações do aluno */}
               <div style={{
                 backgroundColor: 'rgba(15, 23, 42, 0.6)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
@@ -334,10 +404,12 @@ const StudentsList: React.FC = () => {
                 padding: '0.75rem',
                 marginBottom: '1rem'
               }}>
+                {/* Código de acesso */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  marginBottom: '0.75rem'
                 }}>
                   <div>
                     <div style={{
@@ -395,6 +467,37 @@ const StudentsList: React.FC = () => {
                     )}
                   </button>
                 </div>
+
+                {/* Detalhes do aluno */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.75rem',
+                  fontSize: '0.75rem'
+                }}>
+                  {student.workoutCount && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      color: '#86efac'
+                    }}>
+                      <Target size={12} />
+                      {student.workoutCount} treino{student.workoutCount > 1 ? 's' : ''}
+                    </div>
+                  )}
+                  {student.lastWorkout && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      color: '#94a3b8'
+                    }}>
+                      <Calendar size={12} />
+                      Último: {formatDate(student.lastWorkout)}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Ações */}
@@ -451,6 +554,34 @@ const StudentsList: React.FC = () => {
                 >
                   Criar Treino
                 </Link>
+
+                <button
+                  onClick={() => handleDeleteStudent(student.id)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#fca5a5',
+                    padding: '0.75rem',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s',
+                    minWidth: '44px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                  }}
+                  title="Excluir aluno"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           ))}

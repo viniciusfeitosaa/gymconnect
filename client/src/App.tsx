@@ -4,8 +4,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LandingPage from './components/LandingPage';
 import PersonalDashboard from './components/PersonalDashboard';
 import StudentAccess from './components/StudentAccess';
+import StudentWorkouts from './components/StudentWorkouts';
 import Login from './components/Login';
 import Register from './components/Register';
+// NewStudent importado em PersonalDashboard
 
 // Componente de rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -29,6 +31,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/student-access" element={<StudentAccess />} />
+      <Route path="/student-workouts/:accessCode" element={<StudentWorkouts />} />
       <Route 
         path="/dashboard/*" 
         element={

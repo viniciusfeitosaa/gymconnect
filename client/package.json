@@ -47,7 +47,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "http://localhost:3001",
   "devDependencies": {
     "@netlify/functions": "^2.8.2",
     "netlify-cli": "^17.38.1"

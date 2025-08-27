@@ -1,0 +1,56 @@
+/* StudentWorkouts.css */
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .student-workouts-container {
+    padding: 1rem !important;
+  }
+  
+  .student-workouts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .student-workouts-card {
+    padding: 1.5rem !important;
+  }
+  
+  .student-workouts-header h1 {
+    font-size: 2rem !important;
+  }
+  
+  .student-workouts-exercise {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Responsividade para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .student-workouts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Animações de hover suaves */
+.student-workouts-card:hover {
+  transform: translateY(-5px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.student-workouts-exercise:hover {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  background-color: rgba(15, 23, 42, 0.95) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Melhorias de acessibilidade */
+.student-workouts-button:focus {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+.student-workouts-input:focus {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}

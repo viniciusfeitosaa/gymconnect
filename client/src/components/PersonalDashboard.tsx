@@ -3,8 +3,10 @@ import { Link, useNavigate, Routes, Route } from 'react-router-dom';
 import { LogOut, Plus, Users, Dumbbell, BarChart3, Menu } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import StudentsList from './StudentsList';
-import CreateWorkout from './CreateWorkout';
+// CreateWorkout não utilizado mais
 import WorkoutsList from './WorkoutsList';
+import NewStudent from './NewStudent';
+import NewWorkout from './NewWorkout';
 import './PersonalDashboard.css';
 
 // Componente da página inicial do dashboard
@@ -12,12 +14,14 @@ interface Student {
   id: string;
   name: string;
   accessCode: string;
+  workoutCount?: number;
 }
 
 interface Stats {
   totalStudents: number;
   totalWorkouts: number;
   recentStudents: Student[];
+  message?: string;
 }
 
 const DashboardHome: React.FC = () => {
@@ -29,16 +33,38 @@ const DashboardHome: React.FC = () => {
   });
 
   useEffect(() => {
-    // Mock data - substitua por chamadas reais da API
-    setStats({
-      totalStudents: 12,
-      totalWorkouts: 48,
-      recentStudents: [
-        { id: '1', name: 'João Silva', accessCode: 'ABC123' },
-        { id: '2', name: 'Maria Santos', accessCode: 'DEF456' },
-        { id: '3', name: 'Pedro Costa', accessCode: 'GHI789' }
-      ]
-    });
+    const fetchDashboardData = async () => {
+      try {
+        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+        if (process.env.NODE_ENV === 'development') {
+          const response = await fetch('/api/dashboard/stats');
+          if (response.ok) {
+            const data = await response.json();
+            setStats(data);
+          } else {
+            // Fallback para dados estáticos
+            loadStaticStats();
+          }
+        } else {
+          // Em produção, usar dados estáticos
+          loadStaticStats();
+        }
+             } catch (error) {
+         // Fallback para dados estáticos
+         loadStaticStats();
+       }
+    };
+
+    const loadStaticStats = () => {
+      setStats({
+        totalStudents: 0,
+        totalWorkouts: 0,
+        recentStudents: [],
+        message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+      });
+    };
+
+    fetchDashboardData();
   }, []);
 
   return (
@@ -70,7 +96,10 @@ const DashboardHome: React.FC = () => {
 
       {/* Cards de estatísticas */}
       <div className="dashboard-stats-grid" style={{
-        display: 'grid'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem',
+        marginBottom: '3rem'
       }}>
         {/* Card Total de Alunos */}
         <div className="dashboard-stat-card" style={{
@@ -96,7 +125,9 @@ const DashboardHome: React.FC = () => {
             width: '4rem',
             height: '4rem',
             borderRadius: '1rem',
-            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+            background: stats.totalStudents > 0 
+              ? 'linear-gradient(135deg, #3b82f6, #1e40af)'
+              : 'linear-gradient(135deg, #6b7280, #4b5563)',
             marginBottom: '1rem'
           }}>
             <Users size={24} color="white" />
@@ -104,17 +135,27 @@ const DashboardHome: React.FC = () => {
           <div style={{
             fontSize: '2.5rem',
             fontWeight: 'bold',
-            color: 'white',
+            color: stats.totalStudents > 0 ? 'white' : '#9ca3af',
             marginBottom: '0.5rem'
           }}>
             {stats.totalStudents}
           </div>
           <div style={{
-            color: '#94a3b8',
+            color: stats.totalStudents > 0 ? '#94a3b8' : '#6b7280',
             fontSize: '1rem'
           }}>
-            Total de Alunos
+            {stats.totalStudents === 0 ? 'Sem Alunos' : 'Total de Alunos'}
           </div>
+          {stats.totalStudents === 0 && (
+            <div style={{
+              color: '#6b7280',
+              fontSize: '0.75rem',
+              marginTop: '0.5rem',
+              fontStyle: 'italic'
+            }}>
+              Adicione seu primeiro aluno
+            </div>
+          )}
         </div>
 
         {/* Card Total de Treinos */}
@@ -142,7 +183,9 @@ const DashboardHome: React.FC = () => {
             width: '4rem',
             height: '4rem',
             borderRadius: '1rem',
-            background: 'linear-gradient(135deg, #1e40af, #1e293b)',
+            background: stats.totalWorkouts > 0 
+              ? 'linear-gradient(135deg, #1e40af, #1e293b)'
+              : 'linear-gradient(135deg, #6b7280, #4b5563)',
             marginBottom: '1rem'
           }}>
             <Dumbbell size={24} color="white" />
@@ -150,17 +193,27 @@ const DashboardHome: React.FC = () => {
           <div style={{
             fontSize: '2.5rem',
             fontWeight: 'bold',
-            color: 'white',
+            color: stats.totalWorkouts > 0 ? 'white' : '#9ca3af',
             marginBottom: '0.5rem'
           }}>
             {stats.totalWorkouts}
           </div>
           <div style={{
-            color: '#94a3b8',
+            color: stats.totalWorkouts > 0 ? '#94a3b8' : '#6b7280',
             fontSize: '1rem'
           }}>
-            Total de Treinos
+            {stats.totalWorkouts === 0 ? 'Sem Treinos' : 'Total de Treinos'}
           </div>
+          {stats.totalWorkouts === 0 && (
+            <div style={{
+              color: '#6b7280',
+              fontSize: '0.75rem',
+              marginTop: '0.5rem',
+              fontStyle: 'italic'
+            }}>
+              Crie treinos para seus alunos
+            </div>
+          )}
         </div>
       </div>
 
@@ -208,47 +261,123 @@ const DashboardHome: React.FC = () => {
           </Link>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem'
-        }}>
-          {stats.recentStudents.map((student) => (
-            <div
-              key={student.id}
+        {/* Mensagem quando não há alunos */}
+        {stats.totalStudents === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem 2rem',
+            color: '#94a3b8'
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '4rem',
+              height: '4rem',
+              borderRadius: '1rem',
+              background: 'rgba(59, 130, 246, 0.2)',
+              marginBottom: '1rem'
+            }}>
+              <Users size={32} color="#94a3b8" />
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#e2e8f0',
+              marginBottom: '0.5rem'
+            }}>
+              Nenhum aluno cadastrado
+            </h3>
+            <p style={{
+              fontSize: '1rem',
+              marginBottom: '1.5rem',
+              maxWidth: '400px',
+              margin: '0 auto 1.5rem'
+            }}>
+              {stats.message || "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"}
+            </p>
+            <Link
+              to="/dashboard/students/new"
               style={{
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.75rem',
-                padding: '1rem',
+                background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                textDecoration: 'none',
+                fontWeight: '600',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 transition: 'all 0.3s'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                e.currentTarget.style.transform = 'scale(1.05)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
-                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.6)';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              <div style={{
-                color: 'white',
-                fontWeight: '600',
-                marginBottom: '0.5rem'
-              }}>
-                {student.name}
+              <Plus size={18} />
+              Adicionar Primeiro Aluno
+            </Link>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem'
+          }}>
+            {stats.recentStudents.map((student) => (
+              <div
+                key={student.id}
+                style={{
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                  e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                  e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.6)';
+                }}
+              >
+                <div style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  marginBottom: '0.5rem'
+                }}>
+                  {student.name}
+                </div>
+                <div style={{
+                  color: '#94a3b8',
+                  fontSize: '0.875rem',
+                  fontFamily: 'monospace',
+                  marginBottom: '0.5rem'
+                }}>
+                  Código: {student.accessCode}
+                </div>
+                {student.workoutCount && (
+                  <div style={{
+                    color: '#86efac',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem',
+                    display: 'inline-block'
+                  }}>
+                    {student.workoutCount} treino{student.workoutCount > 1 ? 's' : ''}
+                  </div>
+                )}
               </div>
-              <div style={{
-                color: '#94a3b8',
-                fontSize: '0.875rem',
-                fontFamily: 'monospace'
-              }}>
-                Código: {student.accessCode}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Ações rápidas */}
@@ -563,9 +692,9 @@ const PersonalDashboard: React.FC = () => {
           <Routes>
             <Route path="/" element={<DashboardHome />} />
             <Route path="/students" element={<StudentsList />} />
-            <Route path="/students/new" element={<CreateWorkout />} />
+            <Route path="/students/new" element={<NewStudent />} />
             <Route path="/workouts" element={<WorkoutsList />} />
-            <Route path="/workouts/new" element={<CreateWorkout />} />
+            <Route path="/workouts/new" element={<NewWorkout />} />
           </Routes>
         </main>
       </div>

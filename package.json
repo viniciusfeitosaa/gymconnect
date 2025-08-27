@@ -1,37 +1,23 @@
 {
-  "name": "gymconnect",
+  "name": "gymconnect-server",
   "version": "1.0.0",
-  "description": "App web para personal trainers gerenciarem alunos e treinos",
-  "main": "server/index.js",
+  "description": "Servidor local para desenvolvimento do GymConnect",
+  "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && npm run dev",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "client": "cd client && npm start",
-    "build": "cd client && npm install && npm run build",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
-    "lint": "npm run lint:server && npm run lint:client",
-    "lint:server": "cd server && npm run lint",
-    "lint:client": "cd client && npm run lint",
-    "lint:fix": "npm run lint:fix:server && npm run lint:fix:client",
-    "lint:fix:server": "cd server && npm run lint:fix",
-    "lint:fix:client": "cd client && npm run lint:fix",
-    "test": "cd client && npm test",
-    "test:coverage": "cd client && npm run test:coverage"
-  },
-  "keywords": [
-    "gym",
-    "personal",
-    "trainer",
-    "workout"
-  ],
-  "author": "GymConnect",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "dev:full": "concurrently \"npm run dev\" \"npm run client\""
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.3"
-  }
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.0"
+  },
+  "keywords": ["gym", "fitness", "personal-trainer", "workouts"],
+  "author": "GymConnect Team",
+  "license": "MIT"
 }

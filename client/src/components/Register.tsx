@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, User, Dumbbell, Users, Key } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Dumbbell, Users, Search, Key } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Register.css';
 
@@ -17,7 +17,6 @@ const Register: React.FC = () => {
   
   // Estados para Aluno
   const [accessCode, setAccessCode] = useState('');
-  const [studentName, setStudentName] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,20 +49,18 @@ const Register: React.FC = () => {
     setLoading(true);
     setError('');
 
-    if (!accessCode.trim() || !studentName.trim()) {
-      setError('Preencha todos os campos');
+    if (!accessCode.trim()) {
+      setError('Por favor, insira o código de acesso');
       setLoading(false);
       return;
     }
 
     try {
-      // Aqui você pode implementar a lógica para acessar como aluno
-      // Por enquanto, vamos simular um acesso bem-sucedido
-      console.log('Aluno acessando com código:', accessCode, 'Nome:', studentName);
-      // Redirecionar para uma tela de treinos do aluno
-      navigate('/student-workouts', { 
-        state: { accessCode, studentName } 
-      });
+      // Simular verificação do código
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Redirecionar para a página de treinos do aluno
+      navigate(`/student-workouts/${accessCode}`);
     } catch (err: any) {
       setError('Código de acesso inválido');
     } finally {
@@ -535,13 +532,14 @@ const Register: React.FC = () => {
               </p>
 
               {/* Access Code Field */}
-              <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '2rem' }}>
                 <label style={{
                   display: 'block',
                   color: '#f1f5f9',
-                  fontSize: '0.875rem',
+                  fontSize: '1rem',
                   fontWeight: '500',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.75rem',
+                  textAlign: 'center'
                 }}>
                   Código de Acesso
                 </label>
@@ -555,7 +553,7 @@ const Register: React.FC = () => {
                     left: '1rem',
                     color: '#64748b'
                   }}>
-                    <Key size={20} />
+                    <Search size={24} />
                   </div>
                   <input
                     type="text"
@@ -564,64 +562,14 @@ const Register: React.FC = () => {
                     required
                     style={{
                       width: '100%',
-                      padding: '0.75rem 1rem 0.75rem 3rem',
+                      padding: '1rem 1rem 1rem 3.5rem',
                       backgroundColor: 'rgba(15, 23, 42, 0.9)',
                       border: '1px solid rgba(59, 130, 246, 0.4)',
-                      borderRadius: '0.75rem',
+                      borderRadius: '1rem',
                       color: 'white',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s',
-                      textTransform: 'uppercase'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.7)';
-                      e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                      e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-                    }}
-                    placeholder="Ex: TEST123"
-                  />
-                </div>
-              </div>
-
-              {/* Student Name Field */}
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{
-                  display: 'block',
-                  color: '#f1f5f9',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  marginBottom: '0.5rem'
-                }}>
-                  Seu Nome
-                </label>
-                <div style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: '1rem',
-                    color: '#64748b'
-                  }}>
-                    <User size={20} />
-                  </div>
-                  <input
-                    type="text"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem 0.75rem 3rem',
-                      backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                      border: '1px solid rgba(59, 130, 246, 0.4)',
-                      borderRadius: '0.75rem',
-                      color: 'white',
-                      fontSize: '1rem',
+                      fontSize: '1.125rem',
+                      textAlign: 'center',
+                      letterSpacing: '0.1em',
                       transition: 'all 0.3s'
                     }}
                     onFocus={(e) => {
@@ -632,7 +580,8 @@ const Register: React.FC = () => {
                       e.target.style.borderColor = 'rgba(59, 130, 246, 0.4)';
                       e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
                     }}
-                    placeholder="Seu nome completo"
+                    placeholder="Ex: ABC123"
+                    maxLength={10}
                   />
                 </div>
               </div>
@@ -643,32 +592,53 @@ const Register: React.FC = () => {
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '0.875rem',
+                  padding: '1rem',
                   background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '0.75rem',
-                  fontSize: '1rem',
+                  borderRadius: '1rem',
+                  fontSize: '1.125rem',
                   fontWeight: '600',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.3s',
                   opacity: loading ? 0.7 : 1,
-                  boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)'
+                  boxShadow: '0 15px 35px rgba(59, 130, 246, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(59, 130, 246, 0.4)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 20px 40px rgba(59, 130, 246, 0.4)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!loading) {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.3)';
+                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(59, 130, 246, 0.3)';
                   }
                 }}
               >
-                {loading ? 'Acessando...' : 'Acessar Treinos'}
+                {loading ? (
+                  <>
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      border: '2px solid transparent',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></div>
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <Dumbbell size={20} />
+                    Acessar Treinos
+                  </>
+                )}
               </button>
             </form>
           )}
@@ -728,6 +698,11 @@ const Register: React.FC = () => {
         @keyframes pulse {
           0% { opacity: 0.2; }
           100% { opacity: 0.4; }
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>

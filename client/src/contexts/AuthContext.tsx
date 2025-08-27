@@ -57,7 +57,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('/.netlify/functions/api', { email, password });
+      // Em desenvolvimento, usar backend local; em produção, usar Netlify Functions
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? '/.netlify/functions/api' 
+        : '/api/auth/login';
+      
+      const response = await axios.post(apiUrl, { email, password });
       const { token, user } = response.data;
       
       localStorage.setItem('token', token);

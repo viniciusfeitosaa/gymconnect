@@ -1,61 +1,132 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Calendar, Clock, Dumbbell, User, Eye, Edit } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Search, ArrowLeft, Dumbbell, Calendar, Target, Users, Trash2 } from 'lucide-react';
+
+interface Exercise {
+  id: number;
+  name: string;
+  sets: number;
+  reps: number;
+  weight?: string;
+  rest: string;
+  notes?: string;
+}
 
 interface Workout {
   id: string;
   name: string;
   description: string;
+  studentName: string;
+  studentAccessCode: string;
   created_at: string;
-  updated_at: string;
-}
-
-interface Student {
-  id: string;
-  name: string;
-  accessCode: string;
+  exercises: Exercise[];
 }
 
 const WorkoutsList: React.FC = () => {
-  const { studentId } = useParams<{ studentId: string }>();
-  const [student, setStudent] = useState<Student | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchStudentAndWorkouts = useCallback(async () => {
-    try {
-      // Buscar informações do aluno
-      const studentResponse = await axios.get(`/api/students/${studentId}`);
-      setStudent(studentResponse.data);
-
-      // Buscar treinos do aluno
-      const workoutsResponse = await axios.get(`/api/students/${studentId}/workouts`);
-      setWorkouts(workoutsResponse.data);
-
-      setLoading(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar dados');
-      setLoading(false);
-    }
-  }, [studentId]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (studentId) {
-      fetchStudentAndWorkouts();
+    const fetchWorkouts = async () => {
+      try {
+        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+        if (process.env.NODE_ENV === 'development') {
+          const response = await fetch('/api/workouts');
+          if (response.ok) {
+            const data = await response.json();
+            setWorkouts(data.workouts);
+          } else {
+            // Fallback para dados estáticos
+            loadStaticWorkouts();
+          }
+        } else {
+          // Em produção, usar dados estáticos
+          loadStaticWorkouts();
+        }
+           } catch (error) {
+       // Fallback para dados estáticos
+       loadStaticWorkouts();
+     } finally {
+        setLoading(false);
+      }
+    };
+
+    const loadStaticWorkouts = () => {
+      const staticWorkouts = [
+        {
+          id: '1',
+          name: 'Treino A - Força Superior',
+          description: 'Foco em desenvolvimento de força para membros superiores',
+          studentName: 'Ana Beatriz',
+          studentAccessCode: 'ANA001',
+          created_at: '2024-01-15',
+          exercises: [
+            { id: 1, name: 'Supino Reto', sets: 4, reps: 8, weight: '60kg', rest: '2 min', notes: 'Manter ombros para trás' },
+            { id: 2, name: 'Remada Curvada', sets: 4, reps: 10, weight: '45kg', rest: '90 seg', notes: 'Costas retas' }
+          ]
+        },
+        {
+          id: '2',
+          name: 'Treino B - Inferiores',
+          description: 'Desenvolvimento de força para membros inferiores',
+          studentName: 'Carlos Eduardo',
+          studentAccessCode: 'CAR002',
+          created_at: '2024-01-17',
+          exercises: [
+            { id: 3, name: 'Agachamento Livre', sets: 4, reps: 8, weight: '80kg', rest: '3 min', notes: 'Joelhos alinhados' },
+            { id: 4, name: 'Leg Press', sets: 3, reps: 12, weight: '120kg', rest: '2 min', notes: 'Pés na largura dos ombros' }
+          ]
+        },
+        {
+          id: '3',
+          name: 'Treino C - Cardio e Core',
+          description: 'Treino de resistência cardiovascular e core',
+          studentName: 'Fernanda Lima',
+          studentAccessCode: 'FER003',
+          created_at: '2024-01-19',
+          exercises: [
+            { id: 5, name: 'Corrida na Esteira', sets: 1, reps: 1, rest: '5 min', notes: '20 minutos em ritmo moderado' },
+            { id: 6, name: 'Plank', sets: 3, reps: 1, rest: '60 seg', notes: '45 segundos cada' }
+          ]
+        }
+      ];
+      setWorkouts(staticWorkouts);
+    };
+
+    fetchWorkouts();
+  }, []);
+
+  const handleDeleteWorkout = async (workoutId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este treino? Esta ação não pode ser desfeita.')) {
+      try {
+        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+        if (process.env.NODE_ENV === 'development') {
+          const response = await fetch(`/api/workouts/${workoutId}`, { method: 'DELETE' });
+          if (response.ok) {
+            // Remover treino da lista local
+            setWorkouts(workouts.filter(workout => workout.id !== workoutId));
+          } else {
+            alert('Erro ao excluir treino');
+          }
+        } else {
+          // Em produção, remover da lista local
+          setWorkouts(workouts.filter(workout => workout.id !== workoutId));
+        }
+      } catch (error) {
+        alert('Erro ao excluir treino');
+      }
     }
-  }, [studentId, fetchStudentAndWorkouts]);
+  };
+
+  const filteredWorkouts = workouts.filter(workout =>
+    workout.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    workout.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    workout.studentAccessCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   if (loading) {
@@ -74,54 +145,6 @@ const WorkoutsList: React.FC = () => {
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }}></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{
-        textAlign: 'center',
-        padding: '2rem'
-      }}>
-        <div style={{
-          color: '#fca5a5',
-          fontSize: '1.125rem',
-          marginBottom: '1rem'
-        }}>
-          {error}
-        </div>
-        <button
-          onClick={fetchStudentAndWorkouts}
-          style={{
-            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-            color: 'white',
-            border: 'none',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '0.5rem',
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}
-        >
-          Tentar Novamente
-        </button>
-      </div>
-    );
-  }
-
-  if (!student) {
-    return (
-      <div style={{
-        textAlign: 'center',
-        padding: '2rem'
-      }}>
-        <div style={{
-          color: '#fca5a5',
-          fontSize: '1.125rem'
-        }}>
-          Aluno não encontrado
-        </div>
       </div>
     );
   }
@@ -147,7 +170,7 @@ const WorkoutsList: React.FC = () => {
           gap: '1rem'
         }}>
           <Link
-            to="/dashboard/students"
+            to="/dashboard"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -165,12 +188,12 @@ const WorkoutsList: React.FC = () => {
             }}
           >
             <ArrowLeft size={16} />
-            Voltar aos Alunos
+            Voltar ao Dashboard
           </Link>
         </div>
 
         <Link
-          to={`/dashboard/students/${studentId}/workouts/create`}
+          to="/dashboard/workouts/new"
           style={{
             background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
             color: 'white',
@@ -191,17 +214,12 @@ const WorkoutsList: React.FC = () => {
           }}
         >
           <Plus size={20} />
-          Criar Treino
+          Criar Novo Treino
         </Link>
       </div>
 
-      {/* Informações do aluno */}
+      {/* Título e estatísticas */}
       <div style={{
-        backgroundColor: 'rgba(2, 6, 23, 0.8)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem',
-        padding: '2rem',
         marginBottom: '2rem',
         textAlign: 'center'
       }}>
@@ -215,7 +233,7 @@ const WorkoutsList: React.FC = () => {
           background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
           marginBottom: '1rem'
         }}>
-          <User size={24} color="white" />
+          <Dumbbell size={24} color="white" />
         </div>
         <h1 style={{
           fontSize: '2rem',
@@ -223,31 +241,63 @@ const WorkoutsList: React.FC = () => {
           color: 'white',
           marginBottom: '0.5rem'
         }}>
-          Treinos de {student.name}
+          Gerenciar Treinos
         </h1>
         <p style={{
           color: '#94a3b8',
-          fontSize: '1rem',
-          marginBottom: '1rem'
-        }}>
-          Código de acesso: <span style={{
-            fontFamily: 'monospace',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '0.25rem',
-            color: '#60a5fa'
-          }}>{student.accessCode}</span>
-        </p>
-        <p style={{
-          color: '#64748b',
-          fontSize: '0.875rem'
+          fontSize: '1rem'
         }}>
           {workouts.length} treino{workouts.length !== 1 ? 's' : ''} criado{workouts.length !== 1 ? 's' : ''}
         </p>
       </div>
 
+      {/* Barra de pesquisa */}
+      <div style={{
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          position: 'relative',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}>
+          <div style={{
+            position: 'absolute',
+            left: '1rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#64748b'
+          }}>
+            <Search size={20} />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nome do treino, aluno ou código..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem 0.75rem 3rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '0.75rem',
+              color: 'white',
+              fontSize: '1rem',
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+            }}
+          />
+        </div>
+      </div>
+
       {/* Lista de treinos */}
-      {workouts.length === 0 ? (
+      {filteredWorkouts.length === 0 ? (
         <div style={{
           textAlign: 'center',
           padding: '4rem 2rem',
@@ -262,39 +312,14 @@ const WorkoutsList: React.FC = () => {
             color: '#94a3b8',
             marginBottom: '0.5rem'
           }}>
-            Nenhum treino criado ainda
+            Nenhum treino encontrado
           </h3>
           <p style={{
             color: '#64748b',
-            fontSize: '0.875rem',
-            marginBottom: '1.5rem'
+            fontSize: '0.875rem'
           }}>
-            Comece criando o primeiro treino para {student.name}
+            {searchTerm ? 'Tente ajustar os termos de busca.' : 'Comece criando seu primeiro treino.'}
           </p>
-          <Link
-            to={`/dashboard/students/${studentId}/workouts/create`}
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontWeight: '600',
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <Plus size={20} />
-            Criar Primeiro Treino
-          </Link>
         </div>
       ) : (
         <div style={{
@@ -302,7 +327,7 @@ const WorkoutsList: React.FC = () => {
           gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
           gap: '1.5rem'
         }}>
-          {workouts.map((workout) => (
+          {filteredWorkouts.map((workout) => (
             <div
               key={workout.id}
               style={{
@@ -322,77 +347,97 @@ const WorkoutsList: React.FC = () => {
                 e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
               }}
             >
-              {/* Header do treino */}
+              {/* Header do card */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
                 marginBottom: '1rem'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '0.5rem',
-                    background: 'linear-gradient(135deg, #1e40af, #1e293b)'
+                <div>
+                  <h3 style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: 'white',
+                    marginBottom: '0.25rem'
                   }}>
-                    <Dumbbell size={16} color="white" />
-                  </div>
-                  <div>
-                    <h3 style={{
-                      fontSize: '1.125rem',
-                      fontWeight: '600',
-                      color: 'white',
-                      marginBottom: '0.25rem'
-                    }}>
-                      {workout.name}
-                    </h3>
-                    <p style={{
-                      color: '#94a3b8',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.4'
-                    }}>
-                      {workout.description || 'Sem descrição'}
-                    </p>
-                  </div>
+                    {workout.name}
+                  </h3>
+                  <p style={{
+                    color: '#64748b',
+                    fontSize: '0.75rem'
+                  }}>
+                    Criado em {formatDate(workout.created_at)}
+                  </p>
                 </div>
               </div>
 
-              {/* Informações de data */}
+              {/* Descrição */}
+              <p style={{
+                color: '#94a3b8',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+                lineHeight: '1.5'
+              }}>
+                {workout.description}
+              </p>
+
+              {/* Informações do aluno */}
               <div style={{
-                display: 'flex',
-                gap: '1rem',
-                marginBottom: '1.5rem'
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                padding: '0.75rem',
+                marginBottom: '1rem'
               }}>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  color: '#64748b',
+                  marginBottom: '0.5rem'
+                }}>
+                  <Users size={14} color="#94a3b8" />
+                  <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+                    Aluno: <strong style={{ color: 'white' }}>{workout.studentName}</strong>
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: '#94a3b8',
                   fontSize: '0.75rem'
                 }}>
-                  <Calendar size={14} />
-                  Criado em {formatDate(workout.created_at)}
+                  <Target size={14} />
+                  Código: <strong style={{ color: 'white', fontFamily: 'monospace' }}>{workout.studentAccessCode}</strong>
                 </div>
-                {workout.updated_at !== workout.created_at && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#64748b',
-                    fontSize: '0.75rem'
-                  }}>
-                    <Clock size={14} />
-                    Atualizado em {formatTime(workout.updated_at)}
-                  </div>
-                )}
+              </div>
+
+              {/* Estatísticas do treino */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                marginBottom: '1rem',
+                fontSize: '0.75rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: '#86efac'
+                }}>
+                  <Target size={12} />
+                  {workout.exercises.length} exercício{workout.exercises.length > 1 ? 's' : ''}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: '#94a3b8'
+                }}>
+                  <Calendar size={12} />
+                  {formatDate(workout.created_at)}
+                </div>
               </div>
 
               {/* Ações */}
@@ -401,7 +446,7 @@ const WorkoutsList: React.FC = () => {
                 gap: '0.75rem'
               }}>
                 <Link
-                  to={`/dashboard/students/${studentId}/workouts/${workout.id}`}
+                  to={`/dashboard/workouts/${workout.id}`}
                   style={{
                     flex: 1,
                     background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
@@ -412,10 +457,6 @@ const WorkoutsList: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '0.875rem',
                     fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
                     transition: 'all 0.3s'
                   }}
                   onMouseEnter={(e) => {
@@ -425,12 +466,11 @@ const WorkoutsList: React.FC = () => {
                     e.currentTarget.style.transform = 'scale(1)';
                   }}
                 >
-                  <Eye size={16} />
-                  Visualizar
+                  Ver Detalhes
                 </Link>
                 
                 <Link
-                  to={`/dashboard/students/${studentId}/workouts/${workout.id}/edit`}
+                  to={`/dashboard/workouts/${workout.id}/edit`}
                   style={{
                     flex: 1,
                     border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -441,10 +481,6 @@ const WorkoutsList: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '0.875rem',
                     fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
                     transition: 'all 0.3s'
                   }}
                   onMouseEnter={(e) => {
@@ -456,9 +492,36 @@ const WorkoutsList: React.FC = () => {
                     e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                   }}
                 >
-                  <Edit size={16} />
                   Editar
                 </Link>
+
+                <button
+                  onClick={() => handleDeleteWorkout(workout.id)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#fca5a5',
+                    padding: '0.75rem',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s',
+                    minWidth: '44px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                  }}
+                  title="Excluir treino"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           ))}
