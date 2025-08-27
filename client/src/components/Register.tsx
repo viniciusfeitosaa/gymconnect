@@ -14,6 +14,7 @@ const Register: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   
   // Estados para Aluno
   const [accessCode, setAccessCode] = useState('');
@@ -23,13 +24,80 @@ const Register: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const getPasswordStrength = (password: string): { level: 'fraca' | 'boa' | 'forte', score: number, color: string } => {
+    let score = 0;
+    
+    // Comprimento mínimo
+    if (password.length >= 6) score += 1;
+    if (password.length >= 8) score += 1;
+    if (password.length >= 12) score += 1;
+    
+    // Letras maiúsculas
+    if (/[A-Z]/.test(password)) score += 1;
+    
+    // Letras minúsculas
+    if (/[a-z]/.test(password)) score += 1;
+    
+    // Números
+    if (/[0-9]/.test(password)) score += 1;
+    
+    // Caracteres especiais
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 1;
+    
+    // Variação de caracteres
+    if (password.length > 0) {
+      const uniqueChars = new Set(password).size;
+      if (uniqueChars >= 6) score += 1;
+    }
+    
+    // Bônus por comprimento extra longo
+    if (password.length >= 16) score += 1;
+    
+    if (score <= 2) return { level: 'fraca', score, color: '#ef4444' };
+    if (score <= 5) return { level: 'boa', score, color: '#f59e0b' };
+    return { level: 'forte', score, color: '#10b981' };
+  };
+
+  const validatePassword = (password: string): boolean => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    if (!hasUpperCase) {
+      setPasswordError('A senha deve conter pelo menos uma letra maiúscula');
+      return false;
+    }
+    
+    if (!hasSpecialChar) {
+      setPasswordError('A senha deve conter pelo menos um caractere especial');
+      return false;
+    }
+    
+    setPasswordError('');
+    return true;
+  };
+
   const handlePersonalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setPasswordError('');
 
     if (password !== confirmPassword) {
       setError('As senhas não coincidem');
+      setLoading(false);
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Senha não atende aos critérios de segurança');
+      setLoading(false);
+      return;
+    }
+
+    // Verificar se a senha é pelo menos "boa"
+    const strength = getPasswordStrength(password);
+    if (strength.level === 'fraca') {
+      setError('Sua senha é muito fraca. Melhore-a para continuar.');
       setLoading(false);
       return;
     }
@@ -363,31 +431,36 @@ const Register: React.FC = () => {
                   }}>
                     <Lock size={20} />
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem 0.75rem 3rem',
-                      backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                      border: '1px solid rgba(59, 130, 246, 0.4)',
-                      borderRadius: '0.75rem',
-                      color: 'white',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.7)';
-                      e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                      e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-                    }}
-                    placeholder="••••••••"
-                  />
+                                  <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) {
+                      validatePassword(e.target.value);
+                    }
+                  }}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem 0.75rem 3rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    border: `1px solid ${passwordError ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.4)'}`,
+                    borderRadius: '0.75rem',
+                    color: 'white',
+                    fontSize: '1rem',
+                    transition: 'all 0.3s'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = passwordError ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+                    e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = passwordError ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.4)';
+                    e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                  }}
+                  placeholder="Digite uma senha forte (mínimo 6 caracteres)"
+                />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -404,6 +477,117 @@ const Register: React.FC = () => {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+                
+                {/* Mensagens de erro da senha */}
+                {passwordError && (
+                  <div style={{
+                    color: '#fca5a5',
+                    fontSize: '0.75rem',
+                    marginTop: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    {passwordError}
+                  </div>
+                )}
+                
+                {/* Indicador de força da senha em níveis */}
+                {password && (
+                  <div style={{
+                    marginTop: '0.75rem'
+                  }}>
+                    {/* Barra de progresso */}
+                    <div style={{
+                      width: '100%',
+                      height: '4px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                      borderRadius: '2px',
+                      overflow: 'hidden',
+                      marginBottom: '0.5rem'
+                    }}>
+                                             <div style={{
+                         width: `${Math.min((getPasswordStrength(password).score / 8) * 100, 100)}%`,
+                         height: '100%',
+                         backgroundColor: getPasswordStrength(password).color,
+                         borderRadius: '2px',
+                         transition: 'all 0.3s ease'
+                       }}></div>
+                    </div>
+                    
+                    {/* Texto e ícone da força */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '0.75rem'
+                    }}>
+                      <span style={{
+                        color: getPasswordStrength(password).color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        fontWeight: '500'
+                      }}>
+                        {getPasswordStrength(password).level === 'fraca' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                          </svg>
+                        )}
+                        {getPasswordStrength(password).level === 'boa' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="8" y1="12" x2="11" y2="15"></line>
+                            <line x1="11" y1="15" x2="16" y2="9"></line>
+                          </svg>
+                        )}
+                        {getPasswordStrength(password).level === 'forte' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 6 9 17l-5-5"></path>
+                          </svg>
+                        )}
+                        Senha {getPasswordStrength(password).level}
+                      </span>
+                      
+                                             {/* Score numérico */}
+                       <span style={{
+                         color: '#64748b',
+                         fontSize: '0.7rem'
+                       }}>
+                         {getPasswordStrength(password).score}/8
+                       </span>
+                    </div>
+                    
+                    {/* Dicas de melhoria */}
+                    {getPasswordStrength(password).level === 'fraca' && (
+                      <div style={{
+                        color: '#fca5a5',
+                        fontSize: '0.7rem',
+                        marginTop: '0.25rem',
+                        lineHeight: '1.3'
+                      }}>
+                        💡 Dica: Adicione números, letras minúsculas e mais caracteres especiais
+                      </div>
+                    )}
+                    {getPasswordStrength(password).level === 'boa' && (
+                      <div style={{
+                        color: '#fbbf24',
+                        fontSize: '0.7rem',
+                        marginTop: '0.25rem',
+                        lineHeight: '1.3'
+                      }}>
+                        💡 Dica: Aumente o comprimento para tornar a senha mais forte
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Confirm Password Field */}

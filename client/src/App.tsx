@@ -7,7 +7,7 @@ import StudentAccess from './components/StudentAccess';
 import StudentWorkouts from './components/StudentWorkouts';
 import Login from './components/Login';
 import Register from './components/Register';
-import PersonalRegister from './components/PersonalRegister';
+
 // NewStudent importado em PersonalDashboard
 
 // Componente de rota protegida
@@ -31,7 +31,6 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/personal-register" element={<PersonalRegister />} />
       <Route path="/student-access" element={<StudentAccess />} />
       <Route path="/student-workouts/:accessCode" element={<StudentWorkouts />} />
       <Route 

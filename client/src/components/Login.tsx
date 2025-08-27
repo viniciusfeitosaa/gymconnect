@@ -289,7 +289,7 @@ const Login: React.FC = () => {
               fontSize: '0.875rem',
               marginBottom: '0.5rem'
             }}>
-              Não tem uma conta?{' '}
+              É personal trainer?{' '}
               <Link
                 to="/register"
                 style={{
@@ -305,7 +305,7 @@ const Login: React.FC = () => {
                   e.currentTarget.style.color = '#3b82f6';
                 }}
               >
-                Cadastre-se
+                Registre-se aqui
               </Link>
             </p>
             
