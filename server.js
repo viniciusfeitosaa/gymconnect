@@ -84,7 +84,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // Rota para registro de novos personais
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { name, email, password } = req.body;
   
   // Validações básicas
@@ -132,7 +132,7 @@ app.post('/api/auth/register', (req, res) => {
 });
 
 // Rota para login de personais
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   
   // Encontrar o personal pelo email
@@ -220,7 +220,7 @@ app.get('/api/students', authenticateToken, (req, res) => {
 
 // Rota para criar novo aluno (PROTEGIDA)
 app.post('/api/students', authenticateToken, (req, res) => {
-  const { name, accessCode, notes, joinDate, status, personalId } = req.body;
+  const { name, accessCode, notes, joinDate, status } = req.body;
   
   // Validações básicas
   if (!name || !accessCode) {
