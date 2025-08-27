@@ -1,33 +1,19 @@
 [build]
-  # Diretório onde está o frontend React
+  command = "cd client && npm install && npm run build"
   publish = "client/build"
-  
-  # Diretório das funções Netlify
   functions = "netlify/functions"
-  
-  # Comando para build do frontend
-  command = "cd client && npm run build"
 
 [build.environment]
-  # Variáveis de ambiente para build
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
-# Configurações de redirecionamento para SPA
+# Redirecionamento para SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Configurações específicas para funções
-[functions]
-  # Timeout para funções (em segundos)
-  timeout = 10
-  
-  # Memória para funções (em MB)
-  memory = 1024
-
-# Configurações de headers de segurança
+# Headers de segurança
 [[headers]]
   for = "/*"
   [headers.values]
@@ -36,13 +22,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Configurações específicas para arquivos estáticos
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Configurações para API
+# Headers para API
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
