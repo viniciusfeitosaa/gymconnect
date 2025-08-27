@@ -334,6 +334,7 @@ const Register: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    autoComplete="name"
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem 0.75rem 3rem',
@@ -385,6 +386,7 @@ const Register: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    autoComplete="email"
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem 0.75rem 3rem',
@@ -441,6 +443,7 @@ const Register: React.FC = () => {
                     }
                   }}
                   required
+                  autoComplete="new-password"
                   style={{
                     width: '100%',
                     padding: '0.75rem 1rem 0.75rem 3rem',
@@ -618,6 +621,7 @@ const Register: React.FC = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                    autoComplete="new-password"
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem 0.75rem 3rem',

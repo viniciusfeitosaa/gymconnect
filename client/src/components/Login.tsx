@@ -154,6 +154,7 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   style={{
                     width: '100%',
                     padding: '0.75rem 1rem 0.75rem 3rem',
@@ -205,6 +206,7 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   style={{
                     width: '100%',
                     padding: '0.75rem 1rem 0.75rem 3rem',

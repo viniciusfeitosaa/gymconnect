@@ -310,6 +310,7 @@ const NewWorkout: React.FC = () => {
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
+            autoComplete="off"
             style={{
               width: '100%',
               padding: '0.75rem',

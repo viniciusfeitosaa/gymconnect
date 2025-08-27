@@ -192,11 +192,12 @@ const NewStudent: React.FC = () => {
           }}>
             Nome Completo *
           </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            style={{
+                      <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              autoComplete="name"
+              style={{
               width: '100%',
               padding: '0.75rem',
               backgroundColor: 'rgba(15, 23, 42, 0.8)',
@@ -252,6 +253,7 @@ const NewStudent: React.FC = () => {
               type="text"
               value={formData.accessCode}
               onChange={(e) => handleInputChange('accessCode', e.target.value.toUpperCase())}
+              autoComplete="off"
               style={{
                 flex: 1,
                 padding: '0.75rem',
