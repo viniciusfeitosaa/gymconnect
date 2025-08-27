@@ -6,6 +6,10 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
+  CI = "false"
+  DISABLE_ESLINT_PLUGIN = "true"
+  GENERATE_SOURCEMAP = "false"
+  SKIP_PREFLIGHT_CHECK = "true"
 
 # Redirecionamento para SPA
 [[redirects]]
