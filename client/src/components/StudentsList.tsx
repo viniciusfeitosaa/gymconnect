@@ -18,6 +18,8 @@ const StudentsList: React.FC = () => {
   const [error] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
   useEffect(() => {
     fetchStudents();
@@ -90,25 +92,40 @@ const StudentsList: React.FC = () => {
     }
   };
 
-  const handleDeleteStudent = async (studentId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
-      try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          const response = await fetch(`/api/students/${studentId}`, { method: 'DELETE' });
-          if (response.ok) {
-            // Remover aluno da lista local
-            setStudents(students.filter(student => student.id !== studentId));
-          } else {
-            alert('Erro ao excluir aluno');
-          }
+  const openDeleteModal = (student: Student) => {
+    setStudentToDelete(student);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setStudentToDelete(null);
+  };
+
+  const handleDeleteStudent = async () => {
+    if (!studentToDelete) return;
+    
+    try {
+      // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+      if (process.env.NODE_ENV === 'development') {
+        const response = await fetch(`/api/students/${studentToDelete.id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          // Remover aluno da lista local
+          setStudents(students.filter(student => student.id !== studentToDelete.id));
+          closeDeleteModal();
         } else {
-          // Em produção, remover da lista local
-          setStudents(students.filter(student => student.id !== studentId));
+          alert('Erro ao excluir aluno');
         }
-      } catch (error) {
-        alert('Erro ao excluir aluno');
+      } else {
+        // Em produção, remover da lista local
+        setStudents(students.filter(student => student.id !== studentToDelete.id));
+        closeDeleteModal();
       }
+    } catch (error) {
+      alert('Erro ao excluir aluno');
+      closeDeleteModal();
     }
   };
 
@@ -556,7 +573,7 @@ const StudentsList: React.FC = () => {
                 </Link>
 
                 <button
-                  onClick={() => handleDeleteStudent(student.id)}
+                  onClick={() => openDeleteModal(student)}
                   style={{
                     background: 'rgba(239, 68, 68, 0.1)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
@@ -593,7 +610,144 @@ const StudentsList: React.FC = () => {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+        
+        @keyframes modalSlideIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
       `}</style>
+
+      {/* Modal de Confirmação de Exclusão */}
+      {showDeleteModal && studentToDelete && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div style={{
+            backgroundColor: 'rgba(2, 6, 23, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            borderRadius: '1rem',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '100%',
+            textAlign: 'center',
+            animation: 'modalSlideIn 0.3s ease-out'
+          }}>
+            {/* Ícone de Aviso */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '4rem',
+              height: '4rem',
+              borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '2px solid rgba(239, 68, 68, 0.3)',
+              marginBottom: '1.5rem'
+            }}>
+              <Trash2 size={24} color="#fca5a5" />
+            </div>
+
+            {/* Título */}
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: 'white',
+              marginBottom: '0.75rem'
+            }}>
+              Excluir Aluno
+            </h3>
+
+            {/* Mensagem */}
+            <p style={{
+              color: '#94a3b8',
+              fontSize: '0.875rem',
+              lineHeight: '1.5',
+              marginBottom: '2rem'
+            }}>
+              Tem certeza que deseja excluir <strong style={{ color: 'white' }}>{studentToDelete.name}</strong>?
+              <br />
+              <span style={{ color: '#fca5a5', fontSize: '0.75rem' }}>
+                Esta ação não pode ser desfeita.
+              </span>
+            </p>
+
+            {/* Botões */}
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={closeDeleteModal}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid rgba(148, 163, 184, 0.3)',
+                  color: '#94a3b8',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.3s',
+                  minWidth: '100px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={handleDeleteStudent}
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.3s',
+                  minWidth: '100px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

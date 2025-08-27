@@ -221,7 +221,7 @@ const Login: React.FC = () => {
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                    e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                    e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
                   }}
                   placeholder="••••••••"
                 />
@@ -239,9 +239,10 @@ const Login: React.FC = () => {
                   }}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
+                                 </button>
+               </div>
+
+             </div>
 
             {/* Submit Button */}
             <button
@@ -286,7 +287,7 @@ const Login: React.FC = () => {
             <p style={{
               color: '#94a3b8',
               fontSize: '0.875rem',
-              marginBottom: '1rem'
+              marginBottom: '0.5rem'
             }}>
               Não tem uma conta?{' '}
               <Link
@@ -307,6 +308,8 @@ const Login: React.FC = () => {
                 Cadastre-se
               </Link>
             </p>
+            
+
             
             <Link
               to="/student-access"
