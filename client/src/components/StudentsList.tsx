@@ -85,22 +85,25 @@ const StudentsList: React.FC = () => {
     if (!studentToDelete) return;
     
     try {
-      // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-      if (process.env.NODE_ENV === 'development') {
-        const response = await fetch(`/api/students/${studentToDelete.id}`, {
-          method: 'DELETE'
-        });
-        if (response.ok) {
-          // Remover aluno da lista local
-          setStudents(students.filter(student => student.id !== studentToDelete.id));
-          closeDeleteModal();
-        } else {
-          alert('Erro ao excluir aluno');
+      // Usar a API real tanto em desenvolvimento quanto em produção
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? `/api/students/${studentToDelete.id}` 
+        : `/.netlify/functions/api/students/${studentToDelete.id}`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
-      } else {
-        // Em produção, remover da lista local
+      });
+      
+      if (response.ok) {
+        // Remover aluno da lista local
         setStudents(students.filter(student => student.id !== studentToDelete.id));
         closeDeleteModal();
+      } else {
+        alert('Erro ao excluir aluno');
       }
     } catch (error) {
       alert('Erro ao excluir aluno');

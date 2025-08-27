@@ -7,6 +7,7 @@ import StudentsList from './StudentsList';
 import WorkoutsList from './WorkoutsList';
 import NewStudent from './NewStudent';
 import NewWorkout from './NewWorkout';
+import PersonalProfile from './PersonalProfile';
 import './PersonalDashboard.css';
 
 // Componente da página inicial do dashboard
@@ -53,25 +54,33 @@ const DashboardHome: React.FC = () => {
         } else if (response.status === 401) {
           // Token inválido ou expirado
           console.error('Token inválido ou expirado');
-          loadStaticStats();
+          setStats({
+            totalStudents: 0,
+            totalWorkouts: 0,
+            recentStudents: [],
+            message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+          });
         } else {
           console.error('Erro ao carregar estatísticas:', response.status);
-          loadStaticStats();
+          setStats({
+            totalStudents: 0,
+            totalWorkouts: 0,
+            recentStudents: [],
+            message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+          });
         }
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
-        loadStaticStats();
+        setStats({
+          totalStudents: 0,
+          totalWorkouts: 0,
+          recentStudents: [],
+          message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+        });
       }
     };
 
-    const loadStaticStats = () => {
-      setStats({
-        totalStudents: 0,
-        totalWorkouts: 0,
-        recentStudents: [],
-        message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
-      });
-    };
+
 
     fetchDashboardData();
   }, []);
@@ -575,106 +584,192 @@ const PersonalDashboard: React.FC = () => {
         display: 'flex',
         minHeight: 'calc(100vh - 80px)'
       }}>
-        {/* Sidebar */}
-        <div style={{
-          width: sidebarOpen ? '280px' : '0',
-          backgroundColor: 'rgba(2, 6, 23, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRight: '1px solid rgba(59, 130, 246, 0.3)',
-          transition: 'width 0.3s ease',
-          overflow: 'hidden',
-          position: 'fixed',
-          left: 0,
-          top: '80px',
-          height: 'calc(100vh - 80px)',
-          zIndex: 1000
-        }}>
-          <div style={{
-            padding: '2rem 1.5rem',
-            width: '280px'
-          }}>
-            <nav style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <Link
-                to="/dashboard"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.75rem 1rem',
-                  color: '#e2e8f0',
-                  textDecoration: 'none',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                  e.currentTarget.style.color = 'white';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#e2e8f0';
-                }}
-              >
-                <BarChart3 size={20} />
-                Dashboard
-              </Link>
-              
-              <Link
-                to="/dashboard/students"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.75rem 1rem',
-                  color: '#e2e8f0',
-                  textDecoration: 'none',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                  e.currentTarget.style.color = 'white';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#e2e8f0';
-                }}
-              >
-                <Users size={20} />
-                Alunos
-              </Link>
-              
-              <Link
-                to="/dashboard/workouts"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.75rem 1rem',
-                  color: '#e2e8f0',
-                  textDecoration: 'none',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                  e.currentTarget.style.color = 'white';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#e2e8f0';
-                }}
-              >
-                <Dumbbell size={20} />
-                Treinos
-              </Link>
-            </nav>
-          </div>
-        </div>
+                 {/* Sidebar */}
+         <div style={{
+           width: sidebarOpen ? '280px' : '0',
+           backgroundColor: 'rgba(2, 6, 23, 0.95)',
+           backdropFilter: 'blur(10px)',
+           borderRight: '1px solid rgba(59, 130, 246, 0.3)',
+           transition: 'width 0.3s ease',
+           overflow: 'hidden',
+           position: 'fixed',
+           left: 0,
+           top: '80px',
+           height: 'calc(100vh - 80px)',
+           zIndex: 1000
+         }}>
+           <div style={{
+             padding: '2rem 1.5rem',
+             width: '280px',
+             height: '100%',
+             display: 'flex',
+             flexDirection: 'column'
+           }}>
+             {/* Navegação */}
+             <nav style={{
+               display: 'flex',
+               flexDirection: 'column',
+               gap: '0.5rem',
+               flex: 1
+             }}>
+               <Link
+                 to="/dashboard"
+                 style={{
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '0.75rem',
+                   padding: '0.75rem 1rem',
+                   color: '#e2e8f0',
+                   textDecoration: 'none',
+                   borderRadius: '0.5rem',
+                   transition: 'all 0.3s'
+                 }}
+                 onMouseEnter={(e) => {
+                   e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                   e.currentTarget.style.color = 'white';
+                 }}
+                 onMouseLeave={(e) => {
+                   e.currentTarget.style.backgroundColor = 'transparent';
+                   e.currentTarget.style.color = '#e2e8f0';
+                 }}
+               >
+                 <BarChart3 size={20} />
+                 Dashboard
+               </Link>
+               
+               <Link
+                 to="/dashboard/students"
+                 style={{
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '0.75rem',
+                   padding: '0.75rem 1rem',
+                   color: '#e2e8f0',
+                   textDecoration: 'none',
+                   borderRadius: '0.5rem',
+                   transition: 'all 0.3s'
+                 }}
+                 onMouseEnter={(e) => {
+                   e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                   e.currentTarget.style.color = 'white';
+                 }}
+                 onMouseLeave={(e) => {
+                   e.currentTarget.style.backgroundColor = 'transparent';
+                   e.currentTarget.style.color = '#e2e8f0';
+                 }}
+               >
+                 <Users size={20} />
+                 Alunos
+               </Link>
+               
+               <Link
+                 to="/dashboard/workouts"
+                 style={{
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '0.75rem',
+                   padding: '0.75rem 1rem',
+                   color: '#e2e8f0',
+                   textDecoration: 'none',
+                   borderRadius: '0.5rem',
+                   transition: 'all 0.3s'
+                 }}
+                 onMouseEnter={(e) => {
+                   e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                   e.currentTarget.style.color = 'white';
+                 }}
+                 onMouseLeave={(e) => {
+                   e.currentTarget.style.backgroundColor = 'transparent';
+                   e.currentTarget.style.color = '#e2e8f0';
+                 }}
+               >
+                 <Dumbbell size={20} />
+                 Treinos
+               </Link>
+             </nav>
+
+             {/* Seção de Perfil */}
+             <div style={{
+               borderTop: '1px solid rgba(59, 130, 246, 0.2)',
+               paddingTop: '1.5rem',
+               marginTop: 'auto'
+             }}>
+               <div style={{
+                 backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                 border: '1px solid rgba(59, 130, 246, 0.2)',
+                 borderRadius: '0.75rem',
+                 padding: '1rem',
+                 textAlign: 'center'
+               }}>
+                 {/* Avatar */}
+                 <div style={{
+                   display: 'inline-flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   width: '3rem',
+                   height: '3rem',
+                   borderRadius: '50%',
+                   background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                   marginBottom: '0.75rem'
+                 }}>
+                   <Users size={20} color="white" />
+                 </div>
+                 
+                 {/* Nome do Personal */}
+                 <div style={{
+                   color: 'white',
+                   fontWeight: '600',
+                   fontSize: '0.875rem',
+                   marginBottom: '0.25rem'
+                 }}>
+                   Personal Trainer
+                 </div>
+                 
+                 {/* Email */}
+                 <div style={{
+                   color: '#94a3b8',
+                   fontSize: '0.75rem',
+                   marginBottom: '0.75rem'
+                 }}>
+                   personal@gymconnect.com
+                 </div>
+                 
+                 {/* Botão de Perfil */}
+                 <Link
+                   to="/dashboard/profile"
+                   style={{
+                     display: 'inline-flex',
+                     alignItems: 'center',
+                     gap: '0.5rem',
+                     background: 'rgba(59, 130, 246, 0.1)',
+                     border: '1px solid rgba(59, 130, 246, 0.3)',
+                     color: '#60a5fa',
+                     padding: '0.5rem 0.75rem',
+                     borderRadius: '0.5rem',
+                     textDecoration: 'none',
+                     fontSize: '0.75rem',
+                     fontWeight: '500',
+                     transition: 'all 0.3s'
+                   }}
+                   onMouseEnter={(e) => {
+                     e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                     e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                   }}
+                   onMouseLeave={(e) => {
+                     e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                     e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                   }}
+                 >
+                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                     <circle cx="12" cy="7" r="4"></circle>
+                   </svg>
+                   Ver Perfil
+                 </Link>
+               </div>
+             </div>
+           </div>
+         </div>
 
         {/* Overlay para fechar sidebar em mobile */}
         {sidebarOpen && (
@@ -698,13 +793,14 @@ const PersonalDashboard: React.FC = () => {
           marginLeft: sidebarOpen ? '280px' : '0',
           transition: 'margin-left 0.3s ease'
         }}>
-          <Routes>
-            <Route path="/" element={<DashboardHome />} />
-            <Route path="/students" element={<StudentsList />} />
-            <Route path="/students/new" element={<NewStudent />} />
-            <Route path="/workouts" element={<WorkoutsList />} />
-            <Route path="/workouts/new" element={<NewWorkout />} />
-          </Routes>
+                     <Routes>
+             <Route path="/" element={<DashboardHome />} />
+             <Route path="/students" element={<StudentsList />} />
+             <Route path="/students/new" element={<NewStudent />} />
+             <Route path="/workouts" element={<WorkoutsList />} />
+             <Route path="/workouts/new" element={<NewWorkout />} />
+             <Route path="/profile" element={<PersonalProfile />} />
+           </Routes>
         </main>
       </div>
     </div>

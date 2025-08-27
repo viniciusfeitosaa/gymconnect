@@ -1,0 +1,827 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Camera } from 'lucide-react';
+
+interface PersonalProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  specialties?: string[];
+  experience?: string;
+  certifications?: string[];
+}
+
+const PersonalProfile: React.FC = () => {
+  const [profile, setProfile] = useState<PersonalProfile>({
+    id: '1',
+    name: 'Personal Trainer',
+    email: 'personal@gymconnect.com',
+    phone: '(11) 99999-1111',
+    location: 'São Paulo, SP',
+    bio: 'Personal trainer dedicado a transformar vidas através do fitness e bem-estar.',
+    specialties: ['Musculação', 'Funcional', 'Emagrecimento'],
+    experience: '5+ anos',
+    certifications: ['CREF 123456-SP', 'Especialização em Biomecânica']
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<PersonalProfile>(profile);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Aqui você pode carregar os dados reais do perfil da API
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      // Implementar chamada para API quando disponível
+      // const response = await fetch('/api/profile');
+      // const data = await response.json();
+      // setProfile(data);
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Implementar salvamento na API quando disponível
+      // const response = await fetch('/api/profile', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(editedProfile)
+      // });
+      
+      // Simular salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setProfile(editedProfile);
+      setIsEditing(false);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert('Erro ao atualizar perfil');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedProfile(profile);
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field: keyof PersonalProfile, value: string | string[]) => {
+    setEditedProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addSpecialty = () => {
+    const newSpecialty = prompt('Digite uma nova especialidade:');
+    if (newSpecialty && newSpecialty.trim()) {
+      handleInputChange('specialties', [...(editedProfile.specialties || []), newSpecialty.trim()]);
+    }
+  };
+
+  const removeSpecialty = (index: number) => {
+    const newSpecialties = editedProfile.specialties?.filter((_, i) => i !== index) || [];
+    handleInputChange('specialties', newSpecialties);
+  };
+
+  const addCertification = () => {
+    const newCert = prompt('Digite uma nova certificação:');
+    if (newCert && newCert.trim()) {
+      handleInputChange('certifications', [...(editedProfile.certifications || []), newCert.trim()]);
+    }
+  };
+
+  const removeCertification = (index: number) => {
+    const newCerts = editedProfile.certifications?.filter((_, i) => i !== index) || [];
+    handleInputChange('certifications', newCerts);
+  };
+
+  return (
+    <div style={{
+      padding: '2rem',
+      maxWidth: '800px',
+      margin: '0 auto'
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        <Link
+          to="/dashboard"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            color: '#94a3b8',
+            textDecoration: 'none',
+            fontSize: '0.875rem',
+            transition: 'color 0.3s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#e2e8f0';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#94a3b8';
+          }}
+        >
+          <ArrowLeft size={16} />
+          Voltar ao Dashboard
+        </Link>
+
+        {!isEditing && (
+          <button
+            onClick={() => setIsEditing(true)}
+            style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              color: '#60a5fa',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+              e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+            }}
+          >
+            <Edit size={16} />
+            Editar Perfil
+          </button>
+        )}
+      </div>
+
+      {/* Título */}
+      <div style={{
+        marginBottom: '2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '4rem',
+          height: '4rem',
+          borderRadius: '1rem',
+          background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+          marginBottom: '1rem'
+        }}>
+          <User size={24} color="white" />
+        </div>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '0.5rem'
+        }}>
+          Meu Perfil
+        </h1>
+        <p style={{
+          color: '#94a3b8',
+          fontSize: '1rem'
+        }}>
+          Gerencie suas informações pessoais e profissionais
+        </p>
+      </div>
+
+      {/* Formulário/Perfil */}
+      <div style={{
+        backgroundColor: 'rgba(2, 6, 23, 0.8)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        borderRadius: '1rem',
+        padding: '2rem'
+      }}>
+        {/* Foto de Perfil */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            position: 'relative',
+            display: 'inline-block'
+          }}>
+            <div style={{
+              width: '8rem',
+              height: '8rem',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto'
+            }}>
+              <User size={48} color="white" />
+            </div>
+            {isEditing && (
+              <button
+                style={{
+                  position: 'absolute',
+                  bottom: '0',
+                  right: '0',
+                  background: 'rgba(59, 130, 246, 0.9)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.5rem',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <Camera size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Informações Básicas */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          {/* Nome */}
+          <div>
+            <label style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem'
+            }}>
+              Nome Completo
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProfile.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                }}
+              />
+            ) : (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem'
+              }}>
+                {profile.name}
+              </div>
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem'
+            }}>
+              Email
+            </label>
+            {isEditing ? (
+              <input
+                type="email"
+                value={editedProfile.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                }}
+              />
+            ) : (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem'
+              }}>
+                {profile.email}
+              </div>
+            )}
+          </div>
+
+          {/* Telefone */}
+          <div>
+            <label style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem'
+            }}>
+              Telefone
+            </label>
+            {isEditing ? (
+              <input
+                type="tel"
+                value={editedProfile.phone || ''}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                }}
+                placeholder="(11) 99999-1111"
+              />
+            ) : (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem'
+              }}>
+                {profile.phone || 'Não informado'}
+              </div>
+            )}
+          </div>
+
+          {/* Localização */}
+          <div>
+            <label style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem'
+            }}>
+              Localização
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProfile.location || ''}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+                }}
+                placeholder="São Paulo, SP"
+              />
+            ) : (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem'
+              }}>
+                {profile.location || 'Não informado'}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div style={{ marginBottom: '2rem' }}>
+          <label style={{
+            display: 'block',
+            color: 'white',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            marginBottom: '0.5rem'
+          }}>
+            Biografia
+          </label>
+          {isEditing ? (
+            <textarea
+              value={editedProfile.bio || ''}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem',
+                resize: 'vertical',
+                transition: 'all 0.3s',
+                fontFamily: 'inherit'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+              }}
+              placeholder="Conte um pouco sobre você..."
+            />
+          ) : (
+            <div style={{
+              padding: '0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '0.5rem',
+              color: 'white',
+              fontSize: '1rem',
+              lineHeight: '1.5'
+            }}>
+              {profile.bio || 'Nenhuma biografia informada'}
+            </div>
+          )}
+        </div>
+
+        {/* Especialidades */}
+        <div style={{ marginBottom: '2rem' }}>
+          <label style={{
+            display: 'block',
+            color: 'white',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            marginBottom: '0.5rem'
+          }}>
+            Especialidades
+          </label>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.5rem'
+          }}>
+            {(isEditing ? editedProfile.specialties : profile.specialties)?.map((specialty, index) => (
+              <div
+                key={index}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '1rem',
+                  padding: '0.5rem 1rem',
+                  color: '#60a5fa',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                {specialty}
+                {isEditing && (
+                  <button
+                    onClick={() => removeSpecialty(index)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      padding: '0',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {isEditing && (
+              <button
+                onClick={addSpecialty}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px dashed rgba(59, 130, 246, 0.3)',
+                  borderRadius: '1rem',
+                  padding: '0.5rem 1rem',
+                  color: '#60a5fa',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                }}
+              >
+                + Adicionar
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Experiência */}
+        <div style={{ marginBottom: '2rem' }}>
+          <label style={{
+            display: 'block',
+            color: 'white',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            marginBottom: '0.5rem'
+          }}>
+            Tempo de Experiência
+          </label>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editedProfile.experience || ''}
+              onChange={(e) => handleInputChange('experience', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem',
+                transition: 'all 0.3s'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+              }}
+              placeholder="5+ anos"
+            />
+          ) : (
+            <div style={{
+              padding: '0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '0.5rem',
+              color: 'white',
+              fontSize: '1rem'
+            }}>
+              {profile.experience || 'Não informado'}
+            </div>
+          )}
+        </div>
+
+        {/* Certificações */}
+        <div style={{ marginBottom: '2rem' }}>
+          <label style={{
+            display: 'block',
+            color: 'white',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            marginBottom: '0.5rem'
+          }}>
+            Certificações
+          </label>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+          }}>
+            {(isEditing ? editedProfile.certifications : profile.certifications)?.map((cert, index) => (
+              <div
+                key={index}
+                style={{
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem',
+                  color: '#4ade80',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
+                {cert}
+                {isEditing && (
+                  <button
+                    onClick={() => removeCertification(index)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      padding: '0',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {isEditing && (
+              <button
+                onClick={addCertification}
+                style={{
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px dashed rgba(34, 197, 94, 0.3)',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem',
+                  color: '#4ade80',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                }}
+              >
+                + Adicionar Certificação
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Botões de Ação */}
+        {isEditing && (
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'flex-end'
+          }}>
+            <button
+              onClick={handleCancel}
+              style={{
+                border: '1px solid rgba(148, 163, 184, 0.3)',
+                color: '#94a3b8',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+                e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+              }}
+            >
+              Cancelar
+            </button>
+            
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              style={{
+                background: loading 
+                  ? 'rgba(59, 130, 246, 0.3)' 
+                  : 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }
+              }}
+            >
+              {loading ? (
+                <>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar Alterações
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PersonalProfile;
