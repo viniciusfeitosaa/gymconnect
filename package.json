@@ -12,7 +12,10 @@
     "dev:sequential": "npm run dev & timeout /t 5 & npm run client",
     "dev:wait": "concurrently --kill-others-on-fail \"npm run dev\" \"wait-on http://localhost:3001/api/test && npm run client\"",
     "build": "cd client && npm run build",
-    "build:full": "npm run build && npm run start:production"
+    "build:full": "npm run build && npm run start:production",
+    "netlify:dev": "cd client && npm run dev",
+    "netlify:build": "cd client && npm run build",
+    "netlify:deploy": "cd client && npm run build && netlify deploy --prod --dir=build --functions=../netlify/functions"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

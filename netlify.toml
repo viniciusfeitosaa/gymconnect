@@ -1,35 +1,51 @@
 [build]
-  base = "client"
-  command = "npm install && npm install pg bcryptjs jsonwebtoken && npm run build"
-  publish = "build"
+  # Diretório onde está o frontend React
+  publish = "client/build"
+  
+  # Diretório das funções Netlify
   functions = "netlify/functions"
-  ignore = "node_modules"
+  
+  # Comando para build do frontend
+  command = "cd client && npm run build"
 
 [build.environment]
+  # Variáveis de ambiente para build
   NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_VERSION = "9"
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/index"
-  force = true
-  status = 200
-
+# Configurações de redirecionamento para SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[build.processing]
-  skip_processing = false
+# Configurações específicas para funções
+[functions]
+  # Timeout para funções (em segundos)
+  timeout = 10
+  
+  # Memória para funções (em MB)
+  memory = 1024
 
-[build.processing.css]
-  bundle = true
-  minify = true
+# Configurações de headers de segurança
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
-[build.processing.js]
-  bundle = true
-  minify = true
+# Configurações específicas para arquivos estáticos
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-[build.processing.html]
-  pretty_urls = true
+# Configurações para API
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
