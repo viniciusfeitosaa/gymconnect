@@ -47,7 +47,6 @@ const StudentWorkouts: React.FC = () => {
           loadStaticWorkouts();
         }
       } catch (error) {
-        console.error('Erro ao carregar treinos:', error);
         // Fallback para dados estáticos
         loadStaticWorkouts();
       } finally {

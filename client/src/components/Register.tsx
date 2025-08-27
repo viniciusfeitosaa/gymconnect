@@ -42,7 +42,7 @@ const Register: React.FC = () => {
     if (/[0-9]/.test(password)) score += 1;
     
     // Caracteres especiais
-    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 1;
+    if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) score += 1;
     
     // Variação de caracteres
     if (password.length > 0) {
@@ -60,7 +60,7 @@ const Register: React.FC = () => {
 
   const validatePassword = (password: string): boolean => {
     const hasUpperCase = /[A-Z]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
     
     if (!hasUpperCase) {
       setPasswordError('A senha deve conter pelo menos uma letra maiúscula');

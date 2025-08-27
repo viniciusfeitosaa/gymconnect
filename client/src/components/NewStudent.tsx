@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Target, Save, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 interface NewStudentForm {
   name: string;
@@ -11,7 +10,6 @@ interface NewStudentForm {
 
 const NewStudent: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [formData, setFormData] = useState<NewStudentForm>({
     name: '',
     accessCode: '',
