@@ -304,6 +304,195 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+// Rota de teste
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend funcionando!', timestamp: new Date().toISOString() });
+});
+
+// Rota para health check
+app.get('/api/health', (req, res) => {
+  const health = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    memory: process.memoryUsage(),
+    version: process.version
+  };
+  
+  res.json(health);
+});
+
+// Rota para estatísticas do dashboard (PROTEGIDA)
+app.get('/api/dashboard/stats', authenticateToken, (req, res) => {
+  const personalId = req.user.id;
+  
+  // Buscar alunos do personal
+  db.all(
+    'SELECT * FROM students WHERE personal_id = ?',
+    [personalId],
+    (err, students) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao buscar alunos' });
+      }
+      
+      // Buscar treinos do personal
+      db.all(
+        'SELECT * FROM workouts WHERE personal_id = ?',
+        [personalId],
+        (err, workouts) => {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao buscar treinos' });
+          }
+          
+          const stats = {
+            totalStudents: students.length,
+            totalWorkouts: workouts.length,
+            recentStudents: students.slice(0, 3).map(student => ({
+              id: student.id,
+              name: student.name,
+              access_code: student.access_code,
+              workoutCount: workouts.filter(w => w.student_id === student.id).length
+            })),
+            message: students.length === 0 
+              ? "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+              : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
+          };
+          
+          res.json(stats);
+        }
+      );
+    }
+  );
+});
+
+// Rota para listar todos os treinos (PROTEGIDA)
+app.get('/api/workouts', authenticateToken, (req, res) => {
+  const personalId = req.user.id;
+  
+  db.all(
+    `SELECT w.*, s.name as student_name, s.access_code as student_access_code 
+     FROM workouts w 
+     JOIN students s ON w.student_id = s.id 
+     WHERE w.personal_id = ? 
+     ORDER BY w.created_at DESC`,
+    [personalId],
+    (err, workouts) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao buscar treinos' });
+      }
+      
+      const workoutsWithExercises = workouts.map(workout => ({
+        ...workout,
+        exercises: JSON.parse(workout.exercises)
+      }));
+      
+      res.json({ workouts: workoutsWithExercises });
+    }
+  );
+});
+
+// Rota para excluir treino (PROTEGIDA)
+app.delete('/api/workouts/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const personalId = req.user.id;
+  
+  db.run(
+    'DELETE FROM workouts WHERE id = ? AND personal_id = ?',
+    [id, personalId],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao excluir treino' });
+      }
+      
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Treino não encontrado ou não autorizado' });
+      }
+      
+      res.json({ message: 'Treino excluído com sucesso' });
+    }
+  );
+});
+
+// Rota para excluir aluno (PROTEGIDA)
+app.delete('/api/students/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const personalId = req.user.id;
+  
+  db.run(
+    'DELETE FROM students WHERE id = ? AND personal_id = ?',
+    [id, personalId],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao excluir aluno' });
+      }
+      
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Aluno não encontrado ou não autorizado' });
+      }
+      
+      res.json({ message: 'Aluno excluído com sucesso' });
+    }
+  );
+});
+
+// Rota para treinos de alunos (pública - sem autenticação)
+app.get('/api/student-workouts/:accessCode', (req, res) => {
+  const { accessCode } = req.params;
+  
+  db.get(
+    'SELECT * FROM students WHERE access_code = ?',
+    [accessCode],
+    (err, student) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      
+      if (!student) {
+        return res.status(404).json({ error: 'Código de acesso inválido' });
+      }
+      
+      // Buscar treinos do aluno
+      db.all(
+        'SELECT * FROM workouts WHERE student_id = ? ORDER BY created_at DESC',
+        [student.id],
+        (err, workouts) => {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao buscar treinos' });
+          }
+          
+          const workoutsWithExercises = workouts.map(workout => ({
+            ...workout,
+            exercises: JSON.parse(workout.exercises)
+          }));
+          
+          res.json({
+            studentName: student.name,
+            workouts: workoutsWithExercises,
+            message: workoutsWithExercises.length === 0 ? 'Nenhum treino encontrado para este aluno' : undefined
+          });
+        }
+      );
+    }
+  );
+});
+
+// Fechar conexão com banco ao encerrar servidor
+process.on('SIGINT', () => {
+  console.log('Encerrando servidor...');
+  db.close((err) => {
+    if (err) {
+      console.error('Erro ao fechar banco de dados:', err);
+    } else {
+      console.log('Conexão com banco de dados fechada.');
+    }
+    process.exit(0);
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`📊 API Test: http://localhost:${PORT}/api/test`);
+  console.log(`🔍 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`💾 Banco de dados SQLite: ./gymconnect.db`);
 });
