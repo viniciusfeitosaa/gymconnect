@@ -17,7 +17,7 @@ const LandingPage: React.FC = () => {
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(59, 130, 246, 0.2)'
       }}>
-        <div style={{ 
+                <div style={{ 
           maxWidth: '1200px', 
           margin: '0 auto', 
           padding: '0 1rem',
@@ -27,6 +27,7 @@ const LandingPage: React.FC = () => {
           flexWrap: 'wrap',
           gap: '1rem'
         }}>
+          {/* Logo e Título - Lado Esquerdo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
@@ -48,11 +49,13 @@ const LandingPage: React.FC = () => {
               GymConnect
             </h1>
           </div>
+          
+          {/* Botões de Navegação - Lado Direito */}
           <div style={{ 
             display: 'flex', 
             gap: '1rem',
             flexWrap: 'wrap',
-            justifyContent: 'center'
+            justifyContent: 'flex-end'
           }}>
             <Link
               to="/login"

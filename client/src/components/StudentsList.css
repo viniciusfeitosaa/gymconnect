@@ -1,0 +1,363 @@
+/* Responsividade para StudentsList */
+
+/* Mobile First */
+.students-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.students-title {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.students-subtitle {
+  font-size: 0.875rem;
+}
+
+.students-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.students-search {
+  margin-bottom: 1.5rem;
+}
+
+.students-search-input {
+  font-size: 16px !important; /* Previne zoom no iOS */
+}
+
+.students-grid {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.student-card {
+  padding: 1rem;
+}
+
+.student-card-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.student-card-title {
+  font-size: 1rem;
+}
+
+.student-card-actions {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.student-card-actions button,
+.student-card-actions a {
+  width: 100%;
+  justify-content: center;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.student-info {
+  padding: 0.5rem;
+}
+
+.student-code-section {
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.student-code-display {
+  font-size: 0.875rem;
+}
+
+.student-details-grid {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.student-detail-item {
+  font-size: 0.75rem;
+}
+
+/* Mobile Landscape */
+@media (min-width: 480px) {
+  .students-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .student-card {
+    padding: 1.25rem;
+  }
+  
+  .student-card-actions {
+    flex-direction: row;
+  }
+  
+  .student-card-actions button,
+  .student-card-actions a {
+    width: auto;
+    flex: 1;
+  }
+  
+  .student-code-section {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .student-details-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .students-container {
+    padding: 1.5rem;
+  }
+  
+  .students-header {
+    margin-bottom: 2rem;
+  }
+  
+  .students-title {
+    font-size: 2rem;
+  }
+  
+  .students-subtitle {
+    font-size: 1rem;
+  }
+  
+  .students-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+  
+  .students-search {
+    margin-bottom: 2rem;
+  }
+  
+  .students-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .student-card {
+    padding: 1.5rem;
+  }
+  
+  .student-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  
+  .student-card-title {
+    font-size: 1.125rem;
+  }
+  
+  .student-info {
+    padding: 0.75rem;
+  }
+  
+  .student-code-display {
+    font-size: 1rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .students-container {
+    padding: 2rem;
+  }
+  
+  .students-title {
+    font-size: 2.5rem;
+  }
+  
+  .students-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+  .students-container {
+    padding: 3rem;
+  }
+  
+  .students-grid {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2.5rem;
+  }
+}
+
+/* Melhorias para telas muito pequenas */
+@media (max-width: 320px) {
+  .students-container {
+    padding: 0.5rem;
+  }
+  
+  .student-card {
+    padding: 0.75rem;
+  }
+  
+  .students-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .students-title {
+    font-size: 1.25rem;
+  }
+  
+  .student-card-actions button,
+  .student-card-actions a {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .student-code-display {
+    font-size: 0.75rem;
+  }
+}
+
+/* Melhorias para inputs em mobile */
+@media (max-width: 768px) {
+  .students-search-input {
+    font-size: 16px !important; /* Previne zoom no iOS */
+  }
+}
+
+/* Estado vazio responsivo */
+.students-empty {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.students-empty svg {
+  margin: 0 auto 1rem auto;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .students-empty {
+    padding: 4rem 2rem;
+  }
+}
+
+/* Loading spinner responsivo */
+.students-loading {
+  min-height: 300px;
+}
+
+@media (min-width: 768px) {
+  .students-loading {
+    min-height: 400px;
+  }
+}
+
+/* Botão de adicionar aluno responsivo */
+.students-create-btn {
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  white-space: nowrap;
+}
+
+/* Botão de copiar código responsivo */
+.student-copy-btn {
+  padding: 0.5rem;
+  min-width: 44px;
+}
+
+@media (min-width: 768px) {
+  .student-copy-btn {
+    padding: 0.5rem;
+  }
+}
+
+/* Modal responsivo */
+.students-modal {
+  padding: 1rem;
+}
+
+.students-modal-content {
+  max-width: 400px;
+  width: 100%;
+  padding: 1.5rem;
+}
+
+@media (min-width: 480px) {
+  .students-modal-content {
+    padding: 2rem;
+  }
+}
+
+.students-modal-actions {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 480px) {
+  .students-modal-actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+.students-modal-btn {
+  min-width: 100px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 479px) {
+  .students-modal-btn {
+    width: 100%;
+  }
+}
+
+/* Melhorias para o código de acesso */
+.student-code-label {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .student-code-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Melhorias para detalhes do aluno */
+.student-detail-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@media (min-width: 768px) {
+  .student-detail-icon {
+    width: 12px;
+    height: 12px;
+  }
+}

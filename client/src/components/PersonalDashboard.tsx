@@ -88,11 +88,12 @@ const DashboardHome: React.FC = () => {
   return (
     <div className="dashboard-container" style={{
       maxWidth: '1200px',
-      margin: '0 auto'
+      margin: '0 auto',
+      padding: '1rem'
     }}>
       {/* Header da página inicial */}
       <div style={{
-        marginBottom: '3rem',
+        marginBottom: '2rem',
         textAlign: 'center'
       }}>
         <h1 className="dashboard-title" style={{
@@ -100,13 +101,16 @@ const DashboardHome: React.FC = () => {
           background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          fontSize: 'clamp(1.5rem, 4vw, 2.5rem)'
         }}>
           Bem-vindo ao seu Dashboard
         </h1>
         <p style={{
           color: '#e2e8f0',
-          fontSize: '1.125rem'
+          fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
+          maxWidth: '600px',
+          margin: '0 auto'
         }}>
           Gerencie seus alunos e treinos de forma simples e eficiente
         </p>
@@ -115,9 +119,9 @@ const DashboardHome: React.FC = () => {
       {/* Cards de estatísticas */}
       <div className="dashboard-stats-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '2rem',
-        marginBottom: '3rem'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
       }}>
         {/* Card Total de Alunos */}
         <div className="dashboard-stat-card" style={{
@@ -125,6 +129,7 @@ const DashboardHome: React.FC = () => {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1rem',
+          padding: '1.5rem',
           textAlign: 'center',
           transition: 'all 0.3s'
         }}
@@ -140,8 +145,8 @@ const DashboardHome: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '4rem',
-            height: '4rem',
+            width: 'clamp(3rem, 8vw, 4rem)',
+            height: 'clamp(3rem, 8vw, 4rem)',
             borderRadius: '1rem',
             background: stats.totalStudents > 0 
               ? 'linear-gradient(135deg, #3b82f6, #1e40af)'
@@ -151,7 +156,7 @@ const DashboardHome: React.FC = () => {
             <Users size={24} color="white" />
           </div>
           <div style={{
-            fontSize: '2.5rem',
+            fontSize: 'clamp(2rem, 6vw, 2.5rem)',
             fontWeight: 'bold',
             color: stats.totalStudents > 0 ? 'white' : '#9ca3af',
             marginBottom: '0.5rem'
@@ -160,7 +165,7 @@ const DashboardHome: React.FC = () => {
           </div>
           <div style={{
             color: stats.totalStudents > 0 ? '#94a3b8' : '#6b7280',
-            fontSize: '1rem'
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
           }}>
             {stats.totalStudents === 0 ? 'Sem Alunos' : 'Total de Alunos'}
           </div>
@@ -182,7 +187,7 @@ const DashboardHome: React.FC = () => {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '1rem',
-          padding: '2rem',
+          padding: '1.5rem',
           textAlign: 'center',
           transition: 'all 0.3s'
         }}
@@ -198,8 +203,8 @@ const DashboardHome: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '4rem',
-            height: '4rem',
+            width: 'clamp(3rem, 8vw, 4rem)',
+            height: 'clamp(3rem, 8vw, 4rem)',
             borderRadius: '1rem',
             background: stats.totalWorkouts > 0 
               ? 'linear-gradient(135deg, #1e40af, #1e293b)'
@@ -209,7 +214,7 @@ const DashboardHome: React.FC = () => {
             <Dumbbell size={24} color="white" />
           </div>
           <div style={{
-            fontSize: '2.5rem',
+            fontSize: 'clamp(2rem, 6vw, 2.5rem)',
             fontWeight: 'bold',
             color: stats.totalWorkouts > 0 ? 'white' : '#9ca3af',
             marginBottom: '0.5rem'
@@ -218,7 +223,7 @@ const DashboardHome: React.FC = () => {
           </div>
           <div style={{
             color: stats.totalWorkouts > 0 ? '#94a3b8' : '#6b7280',
-            fontSize: '1rem'
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
           }}>
             {stats.totalWorkouts === 0 ? 'Sem Treinos' : 'Total de Treinos'}
           </div>
@@ -241,16 +246,18 @@ const DashboardHome: React.FC = () => {
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(59, 130, 246, 0.3)',
         borderRadius: '1rem',
-        padding: '2rem'
+        padding: '1.5rem'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem'
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}>
           <h2 style={{
-            fontSize: '1.5rem',
+            fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
             fontWeight: 'bold',
             color: 'white'
           }}>
@@ -264,9 +271,10 @@ const DashboardHome: React.FC = () => {
               padding: '0.5rem 1rem',
               borderRadius: '0.5rem',
               textDecoration: 'none',
-              fontSize: '0.875rem',
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
               fontWeight: '500',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
+              whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
@@ -342,7 +350,7 @@ const DashboardHome: React.FC = () => {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '1rem'
           }}>
             {stats.recentStudents.map((student) => (
@@ -400,11 +408,11 @@ const DashboardHome: React.FC = () => {
 
       {/* Ações rápidas */}
       <div style={{
-        marginTop: '3rem',
+        marginTop: '2rem',
         textAlign: 'center'
       }}>
         <h3 style={{
-          fontSize: '1.25rem',
+          fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
           fontWeight: '600',
           color: 'white',
           marginBottom: '1.5rem'
@@ -422,14 +430,15 @@ const DashboardHome: React.FC = () => {
             style={{
               background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
               color: 'white',
-              padding: '1rem 2rem',
+              padding: 'clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem)',
               borderRadius: '0.75rem',
               textDecoration: 'none',
               fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
@@ -447,14 +456,15 @@ const DashboardHome: React.FC = () => {
             style={{
               border: '2px solid rgba(59, 130, 246, 0.3)',
               color: 'white',
-              padding: '1rem 2rem',
+              padding: 'clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem)',
               borderRadius: '0.75rem',
               textDecoration: 'none',
               fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
@@ -478,6 +488,7 @@ const PersonalDashboard: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const handleLogout = () => {
     logout();
@@ -487,6 +498,21 @@ const PersonalDashboard: React.FC = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // Detectar mudanças no tamanho da tela
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      // Fechar sidebar automaticamente em mobile quando redimensionar para desktop
+      if (!mobile && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen]);
 
   return (
     <div style={{
@@ -499,12 +525,14 @@ const PersonalDashboard: React.FC = () => {
         backgroundColor: 'rgba(2, 6, 23, 0.95)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
-        padding: '1rem 2rem'
+        padding: '1rem clamp(1rem, 4vw, 2rem)'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}>
           <div style={{
             display: 'flex',
@@ -540,7 +568,7 @@ const PersonalDashboard: React.FC = () => {
                 <Dumbbell size={24} color="white" />
               </div>
               <h1 style={{
-                fontSize: '1.5rem',
+                fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
                 fontWeight: 'bold',
                 background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
                 WebkitBackgroundClip: 'text',
@@ -557,13 +585,15 @@ const PersonalDashboard: React.FC = () => {
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               color: '#fca5a5',
-              padding: '0.5rem 1rem',
+              padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 3vw, 1rem)',
               borderRadius: '0.5rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
@@ -585,7 +615,7 @@ const PersonalDashboard: React.FC = () => {
         minHeight: 'calc(100vh - 80px)'
       }}>
                  {/* Sidebar */}
-         <div style={{
+         <div className={`sidebar-mobile ${sidebarOpen ? 'open' : ''}`} style={{
            width: sidebarOpen ? '280px' : '0',
            backgroundColor: 'rgba(2, 6, 23, 0.95)',
            backdropFilter: 'blur(10px)',
@@ -596,7 +626,8 @@ const PersonalDashboard: React.FC = () => {
            left: 0,
            top: '80px',
            height: 'calc(100vh - 80px)',
-           zIndex: 1000
+           zIndex: 1000,
+           minWidth: sidebarOpen ? '280px' : '0'
          }}>
            <div style={{
              padding: '2rem 1.5rem',
@@ -772,7 +803,7 @@ const PersonalDashboard: React.FC = () => {
          </div>
 
         {/* Overlay para fechar sidebar em mobile */}
-        {sidebarOpen && (
+        {sidebarOpen && isMobile && (
           <div
             onClick={toggleSidebar}
             style={{
@@ -788,9 +819,9 @@ const PersonalDashboard: React.FC = () => {
         )}
 
         {/* Conteúdo principal */}
-        <main style={{
+        <main className={`main-content-mobile ${sidebarOpen ? 'sidebar-open' : ''}`} style={{
           flex: 1,
-          marginLeft: sidebarOpen ? '280px' : '0',
+          marginLeft: isMobile ? '0' : (sidebarOpen ? '280px' : '0'),
           transition: 'margin-left 0.3s ease'
         }}>
                      <Routes>

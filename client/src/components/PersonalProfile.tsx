@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Camera } from 'lucide-react';
+import './PersonalProfile.css';
 
 interface PersonalProfile {
   id: string;
@@ -104,20 +105,9 @@ const PersonalProfile: React.FC = () => {
   };
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '800px',
-      margin: '0 auto'
-    }}>
+    <div className="profile-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
+      <div className="profile-header">
         <Link
           to="/dashboard"
           style={{
@@ -147,15 +137,16 @@ const PersonalProfile: React.FC = () => {
               background: 'rgba(59, 130, 246, 0.1)',
               border: '1px solid rgba(59, 130, 246, 0.3)',
               color: '#60a5fa',
-              padding: '0.75rem 1.5rem',
+              padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 1.5rem)',
               borderRadius: '0.5rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              fontSize: '0.875rem',
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
               fontWeight: '500',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
+              whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
@@ -177,41 +168,36 @@ const PersonalProfile: React.FC = () => {
         marginBottom: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{
+        <div className="profile-avatar" style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '4rem',
-          height: '4rem',
           borderRadius: '1rem',
           background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
           marginBottom: '1rem'
         }}>
           <User size={24} color="white" />
         </div>
-        <h1 style={{
-          fontSize: '2rem',
+        <h1 className="profile-title" style={{
           fontWeight: 'bold',
           color: 'white',
           marginBottom: '0.5rem'
         }}>
           Meu Perfil
         </h1>
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '1rem'
+        <p className="profile-subtitle" style={{
+          color: '#94a3b8'
         }}>
           Gerencie suas informações pessoais e profissionais
         </p>
       </div>
 
       {/* Formulário/Perfil */}
-      <div style={{
+      <div className="profile-form" style={{
         backgroundColor: 'rgba(2, 6, 23, 0.8)',
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem',
-        padding: '2rem'
+        borderRadius: '1rem'
       }}>
         {/* Foto de Perfil */}
         <div style={{
@@ -265,10 +251,8 @@ const PersonalProfile: React.FC = () => {
         </div>
 
         {/* Informações Básicas */}
-        <div style={{
+        <div className="profile-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1.5rem',
           marginBottom: '2rem'
         }}>
           {/* Nome */}
@@ -287,6 +271,7 @@ const PersonalProfile: React.FC = () => {
                 type="text"
                 value={editedProfile.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
+                className="profile-input"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -336,6 +321,7 @@ const PersonalProfile: React.FC = () => {
                 type="email"
                 value={editedProfile.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
+                className="profile-input"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -385,6 +371,7 @@ const PersonalProfile: React.FC = () => {
                 type="tel"
                 value={editedProfile.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
+                className="profile-input"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -534,11 +521,7 @@ const PersonalProfile: React.FC = () => {
           }}>
             Especialidades
           </label>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.5rem'
-          }}>
+          <div className="profile-tags">
             {(isEditing ? editedProfile.specialties : profile.specialties)?.map((specialty, index) => (
               <div
                 key={index}
@@ -662,11 +645,7 @@ const PersonalProfile: React.FC = () => {
           }}>
             Certificações
           </label>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem'
-          }}>
+          <div className="profile-certifications">
             {(isEditing ? editedProfile.certifications : profile.certifications)?.map((cert, index) => (
               <div
                 key={index}
@@ -731,9 +710,8 @@ const PersonalProfile: React.FC = () => {
 
         {/* Botões de Ação */}
         {isEditing && (
-          <div style={{
+          <div className="profile-actions" style={{
             display: 'flex',
-            gap: '1rem',
             justifyContent: 'flex-end'
           }}>
             <button
@@ -741,13 +719,14 @@ const PersonalProfile: React.FC = () => {
               style={{
                 border: '1px solid rgba(148, 163, 184, 0.3)',
                 color: '#94a3b8',
-                padding: '0.75rem 1.5rem',
+                padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 1.5rem)',
                 borderRadius: '0.5rem',
                 background: 'transparent',
                 cursor: 'pointer',
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                 fontWeight: '500',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
@@ -770,15 +749,16 @@ const PersonalProfile: React.FC = () => {
                   : 'linear-gradient(135deg, #3b82f6, #1e40af)',
                 color: 'white',
                 border: 'none',
-                padding: '0.75rem 1.5rem',
+                padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 1.5rem)',
                 borderRadius: '0.5rem',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 if (!loading) {

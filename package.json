@@ -4,9 +4,9 @@
   "description": "Servidor local para desenvolvimento do GymConnect",
   "main": "server.js",
   "scripts": {
-    "start": "node server/index.js",
-    "start:production": "node server/index.js",
-    "dev": "cd server && nodemon index.js",
+    "start": "node server/index-postgres.js",
+    "start:production": "node server/index-postgres.js",
+    "dev": "cd server && nodemon index-postgres.js",
     "client": "cd client && npm start",
     "dev:full": "concurrently \"npm run dev\" \"npm run client\"",
     "dev:sequential": "npm run dev & timeout /t 5 & npm run client",
@@ -18,10 +18,12 @@
     "netlify:deploy": "cd client && npm run build && netlify deploy --prod --dir=build --functions=../netlify/functions"
   },
   "dependencies": {
+    "@types/pg": "^8.15.5",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
     "sqlite3": "^5.1.6",
     "uuid": "^9.0.1"
   },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Copy, Check, Users, Search, ArrowLeft, Calendar, Target, Trash2 } from 'lucide-react';
+import './StudentsList.css';
 
 interface Student {
   id: string;
@@ -122,11 +123,10 @@ const StudentsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{
+      <div className="students-loading" style={{
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px'
+        alignItems: 'center'
       }}>
         <div style={{
           width: '40px',
@@ -173,20 +173,9 @@ const StudentsList: React.FC = () => {
   }
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
+    <div className="students-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
+      <div className="students-header">
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -217,10 +206,10 @@ const StudentsList: React.FC = () => {
 
         <Link
           to="/dashboard/students/new"
+          className="students-create-btn"
           style={{
             background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
             color: 'white',
-            padding: '0.75rem 1.5rem',
             borderRadius: '0.75rem',
             textDecoration: 'none',
             display: 'flex',
@@ -246,38 +235,32 @@ const StudentsList: React.FC = () => {
         marginBottom: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{
+        <div className="students-icon" style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '4rem',
-          height: '4rem',
           borderRadius: '1rem',
           background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
           marginBottom: '1rem'
         }}>
           <Users size={24} color="white" />
         </div>
-        <h1 style={{
-          fontSize: '2rem',
+        <h1 className="students-title" style={{
           fontWeight: 'bold',
           color: 'white',
           marginBottom: '0.5rem'
         }}>
           Gerenciar Alunos
         </h1>
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '1rem'
+        <p className="students-subtitle" style={{
+          color: '#94a3b8'
         }}>
           {students.length} aluno{students.length !== 1 ? 's' : ''} cadastrado{students.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       {/* Barra de pesquisa */}
-      <div style={{
-        marginBottom: '2rem'
-      }}>
+      <div className="students-search">
         <div style={{
           position: 'relative',
           maxWidth: '500px',
@@ -297,6 +280,7 @@ const StudentsList: React.FC = () => {
             placeholder="Buscar por nome ou código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="students-search-input"
             style={{
               width: '100%',
               padding: '0.75rem 1rem 0.75rem 3rem',
@@ -321,9 +305,8 @@ const StudentsList: React.FC = () => {
 
       {/* Lista de alunos */}
       {filteredStudents.length === 0 ? (
-        <div style={{
+        <div className="students-empty" style={{
           textAlign: 'center',
-          padding: '4rem 2rem',
           backgroundColor: 'rgba(2, 6, 23, 0.6)',
           borderRadius: '1rem',
           border: '1px solid rgba(59, 130, 246, 0.2)'
@@ -345,20 +328,18 @@ const StudentsList: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.5rem'
+        <div className="students-grid" style={{
+          display: 'grid'
         }}>
           {filteredStudents.map((student) => (
             <div
               key={student.id}
+              className="student-card"
               style={{
                 backgroundColor: 'rgba(2, 6, 23, 0.8)',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(59, 130, 246, 0.3)',
                 borderRadius: '1rem',
-                padding: '1.5rem',
                 transition: 'all 0.3s'
               }}
               onMouseEnter={(e) => {
@@ -371,15 +352,12 @@ const StudentsList: React.FC = () => {
               }}
             >
               {/* Header do card */}
-              <div style={{
+              <div className="student-card-header" style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
                 marginBottom: '1rem'
               }}>
                 <div>
-                  <h3 style={{
-                    fontSize: '1.125rem',
+                  <h3 className="student-card-title" style={{
                     fontWeight: '600',
                     color: 'white',
                     marginBottom: '0.25rem'
@@ -396,32 +374,27 @@ const StudentsList: React.FC = () => {
               </div>
 
               {/* Informações do aluno */}
-              <div style={{
+              <div className="student-info" style={{
                 backgroundColor: 'rgba(15, 23, 42, 0.6)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
                 borderRadius: '0.5rem',
-                padding: '0.75rem',
                 marginBottom: '1rem'
               }}>
                 {/* Código de acesso */}
-                <div style={{
+                <div className="student-code-section" style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
                   marginBottom: '0.75rem'
                 }}>
                   <div>
-                    <div style={{
+                    <div className="student-code-label" style={{
                       color: '#94a3b8',
-                      fontSize: '0.75rem',
                       marginBottom: '0.25rem'
                     }}>
                       Código de Acesso
                     </div>
-                    <div style={{
+                    <div className="student-code-display" style={{
                       color: 'white',
                       fontFamily: 'monospace',
-                      fontSize: '1rem',
                       fontWeight: '600'
                     }}>
                       {student.accessCode}
@@ -429,6 +402,7 @@ const StudentsList: React.FC = () => {
                   </div>
                   <button
                     onClick={() => copyToClipboard(student.accessCode)}
+                    className="student-copy-btn"
                     style={{
                       background: copiedCode === student.accessCode 
                         ? 'rgba(34, 197, 94, 0.2)' 
@@ -438,7 +412,6 @@ const StudentsList: React.FC = () => {
                         ? 'rgba(34, 197, 94, 0.4)' 
                         : 'rgba(59, 130, 246, 0.3)',
                       color: copiedCode === student.accessCode ? '#4ade80' : '#60a5fa',
-                      padding: '0.5rem',
                       borderRadius: '0.375rem',
                       cursor: 'pointer',
                       display: 'flex',
@@ -468,31 +441,28 @@ const StudentsList: React.FC = () => {
                 </div>
 
                 {/* Detalhes do aluno */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '0.75rem',
-                  fontSize: '0.75rem'
+                <div className="student-details-grid" style={{
+                  display: 'grid'
                 }}>
                   {student.workoutCount && (
-                    <div style={{
+                    <div className="student-detail-item" style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.25rem',
                       color: '#86efac'
                     }}>
-                      <Target size={12} />
+                      <Target className="student-detail-icon" size={12} />
                       {student.workoutCount} treino{student.workoutCount > 1 ? 's' : ''}
                     </div>
                   )}
                   {student.lastWorkout && (
-                    <div style={{
+                    <div className="student-detail-item" style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.25rem',
                       color: '#94a3b8'
                     }}>
-                      <Calendar size={12} />
+                      <Calendar className="student-detail-icon" size={12} />
                       Último: {formatDate(student.lastWorkout)}
                     </div>
                   )}
@@ -500,9 +470,8 @@ const StudentsList: React.FC = () => {
               </div>
 
               {/* Ações */}
-              <div style={{
-                display: 'flex',
-                gap: '0.75rem'
+              <div className="student-card-actions" style={{
+                display: 'flex'
               }}>
                 <Link
                   to={`/dashboard/students/${student.id}/workouts`}
@@ -510,11 +479,9 @@ const StudentsList: React.FC = () => {
                     flex: 1,
                     background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
                     color: 'white',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     textDecoration: 'none',
                     textAlign: 'center',
-                    fontSize: '0.875rem',
                     fontWeight: '500',
                     transition: 'all 0.3s'
                   }}
@@ -534,11 +501,9 @@ const StudentsList: React.FC = () => {
                     flex: 1,
                     border: '1px solid rgba(59, 130, 246, 0.3)',
                     color: 'white',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     textDecoration: 'none',
                     textAlign: 'center',
-                    fontSize: '0.875rem',
                     fontWeight: '500',
                     transition: 'all 0.3s'
                   }}
@@ -560,7 +525,6 @@ const StudentsList: React.FC = () => {
                     background: 'rgba(239, 68, 68, 0.1)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                     color: '#fca5a5',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     display: 'flex',
@@ -607,7 +571,7 @@ const StudentsList: React.FC = () => {
 
       {/* Modal de Confirmação de Exclusão */}
       {showDeleteModal && studentToDelete && (
-        <div style={{
+        <div className="students-modal" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -618,17 +582,13 @@ const StudentsList: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
-          padding: '1rem'
+          zIndex: 1000
         }}>
-          <div style={{
+          <div className="students-modal-content" style={{
             backgroundColor: 'rgba(2, 6, 23, 0.95)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(239, 68, 68, 0.4)',
             borderRadius: '1rem',
-            padding: '2rem',
-            maxWidth: '400px',
-            width: '100%',
             textAlign: 'center',
             animation: 'modalSlideIn 0.3s ease-out'
           }}>
@@ -672,24 +632,21 @@ const StudentsList: React.FC = () => {
             </p>
 
             {/* Botões */}
-            <div style={{
+            <div className="students-modal-actions" style={{
               display: 'flex',
-              gap: '1rem',
               justifyContent: 'center'
             }}>
               <button
                 onClick={closeDeleteModal}
+                className="students-modal-btn"
                 style={{
                   background: 'transparent',
                   border: '1px solid rgba(148, 163, 184, 0.3)',
                   color: '#94a3b8',
-                  padding: '0.75rem 1.5rem',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontSize: '0.875rem',
                   fontWeight: '500',
-                  transition: 'all 0.3s',
-                  minWidth: '100px'
+                  transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
@@ -705,17 +662,15 @@ const StudentsList: React.FC = () => {
 
               <button
                 onClick={handleDeleteStudent}
+                className="students-modal-btn"
                 style={{
                   background: 'linear-gradient(135deg, #ef4444, #dc2626)',
                   border: 'none',
                   color: 'white',
-                  padding: '0.75rem 1.5rem',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontSize: '0.875rem',
                   fontWeight: '500',
-                  transition: 'all 0.3s',
-                  minWidth: '100px'
+                  transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.02)';

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Search, ArrowLeft, Dumbbell, Calendar, Target, Users, Trash2 } from 'lucide-react';
+import './WorkoutsList.css';
 
 interface Exercise {
   id: number;
@@ -107,11 +108,10 @@ const WorkoutsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{
+      <div className="workouts-loading" style={{
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px'
+        alignItems: 'center'
       }}>
         <div style={{
           width: '40px',
@@ -126,20 +126,9 @@ const WorkoutsList: React.FC = () => {
   }
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
+    <div className="workouts-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
+      <div className="workouts-header">
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -170,10 +159,10 @@ const WorkoutsList: React.FC = () => {
 
         <Link
           to="/dashboard/workouts/new"
+          className="workouts-create-btn"
           style={{
             background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
             color: 'white',
-            padding: '0.75rem 1.5rem',
             borderRadius: '0.75rem',
             textDecoration: 'none',
             display: 'flex',
@@ -199,38 +188,32 @@ const WorkoutsList: React.FC = () => {
         marginBottom: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{
+        <div className="workouts-icon" style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '4rem',
-          height: '4rem',
           borderRadius: '1rem',
           background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
           marginBottom: '1rem'
         }}>
           <Dumbbell size={24} color="white" />
         </div>
-        <h1 style={{
-          fontSize: '2rem',
+        <h1 className="workouts-title" style={{
           fontWeight: 'bold',
           color: 'white',
           marginBottom: '0.5rem'
         }}>
           Gerenciar Treinos
         </h1>
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '1rem'
+        <p className="workouts-subtitle" style={{
+          color: '#94a3b8'
         }}>
           {workouts.length} treino{workouts.length !== 1 ? 's' : ''} criado{workouts.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       {/* Barra de pesquisa */}
-      <div style={{
-        marginBottom: '2rem'
-      }}>
+      <div className="workouts-search">
         <div style={{
           position: 'relative',
           maxWidth: '500px',
@@ -250,6 +233,7 @@ const WorkoutsList: React.FC = () => {
             placeholder="Buscar por nome do treino, aluno ou código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="workouts-search-input"
             style={{
               width: '100%',
               padding: '0.75rem 1rem 0.75rem 3rem',
@@ -274,9 +258,8 @@ const WorkoutsList: React.FC = () => {
 
       {/* Lista de treinos */}
       {filteredWorkouts.length === 0 ? (
-        <div style={{
+        <div className="workouts-empty" style={{
           textAlign: 'center',
-          padding: '4rem 2rem',
           backgroundColor: 'rgba(2, 6, 23, 0.6)',
           borderRadius: '1rem',
           border: '1px solid rgba(59, 130, 246, 0.2)'
@@ -298,20 +281,18 @@ const WorkoutsList: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-          gap: '1.5rem'
+        <div className="workouts-grid" style={{
+          display: 'grid'
         }}>
           {filteredWorkouts.map((workout) => (
             <div
               key={workout.id}
+              className="workout-card"
               style={{
                 backgroundColor: 'rgba(2, 6, 23, 0.8)',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(59, 130, 246, 0.3)',
                 borderRadius: '1rem',
-                padding: '1.5rem',
                 transition: 'all 0.3s'
               }}
               onMouseEnter={(e) => {
@@ -324,15 +305,12 @@ const WorkoutsList: React.FC = () => {
               }}
             >
               {/* Header do card */}
-              <div style={{
+              <div className="workout-card-header" style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
                 marginBottom: '1rem'
               }}>
                 <div>
-                  <h3 style={{
-                    fontSize: '1.125rem',
+                  <h3 className="workout-card-title" style={{
                     fontWeight: '600',
                     color: 'white',
                     marginBottom: '0.25rem'
@@ -359,11 +337,10 @@ const WorkoutsList: React.FC = () => {
               </p>
 
               {/* Informações do aluno */}
-              <div style={{
+              <div className="workout-student-info" style={{
                 backgroundColor: 'rgba(15, 23, 42, 0.6)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
                 borderRadius: '0.5rem',
-                padding: '0.75rem',
                 marginBottom: '1rem'
               }}>
                 <div style={{
@@ -390,13 +367,11 @@ const WorkoutsList: React.FC = () => {
               </div>
 
               {/* Estatísticas do treino */}
-              <div style={{
+              <div className="workout-stats" style={{
                 display: 'flex',
-                gap: '1rem',
-                marginBottom: '1rem',
-                fontSize: '0.75rem'
+                marginBottom: '1rem'
               }}>
-                <div style={{
+                <div className="workout-stats-item" style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.25rem',
@@ -405,7 +380,7 @@ const WorkoutsList: React.FC = () => {
                   <Target size={12} />
                   {workout.exercises.length} exercício{workout.exercises.length > 1 ? 's' : ''}
                 </div>
-                <div style={{
+                <div className="workout-stats-item" style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.25rem',
@@ -417,9 +392,8 @@ const WorkoutsList: React.FC = () => {
               </div>
 
               {/* Ações */}
-              <div style={{
-                display: 'flex',
-                gap: '0.75rem'
+              <div className="workout-card-actions" style={{
+                display: 'flex'
               }}>
                 <Link
                   to={`/dashboard/workouts/${workout.id}`}
@@ -427,11 +401,9 @@ const WorkoutsList: React.FC = () => {
                     flex: 1,
                     background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
                     color: 'white',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     textDecoration: 'none',
                     textAlign: 'center',
-                    fontSize: '0.875rem',
                     fontWeight: '500',
                     transition: 'all 0.3s'
                   }}
@@ -451,11 +423,9 @@ const WorkoutsList: React.FC = () => {
                     flex: 1,
                     border: '1px solid rgba(59, 130, 246, 0.3)',
                     color: 'white',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     textDecoration: 'none',
                     textAlign: 'center',
-                    fontSize: '0.875rem',
                     fontWeight: '500',
                     transition: 'all 0.3s'
                   }}
@@ -477,7 +447,6 @@ const WorkoutsList: React.FC = () => {
                     background: 'rgba(239, 68, 68, 0.1)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                     color: '#fca5a5',
-                    padding: '0.75rem',
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     display: 'flex',

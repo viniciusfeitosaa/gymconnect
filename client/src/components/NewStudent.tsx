@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Target, Save, X } from 'lucide-react';
+import './NewStudent.css';
 
 interface NewStudentForm {
   name: string;
@@ -102,30 +103,16 @@ const NewStudent: React.FC = () => {
   };
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '800px',
-      margin: '0 auto'
-    }}>
+    <div className="new-student-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
+      <div className="new-student-header">
         <Link
           to="/dashboard/students"
+          className="new-student-back-link"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
             color: '#94a3b8',
             textDecoration: 'none',
-            fontSize: '0.875rem',
-            transition: 'color 0.3s'
+            fontSize: '0.875rem'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.color = '#e2e8f0';
@@ -144,50 +131,43 @@ const NewStudent: React.FC = () => {
         marginBottom: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{
+        <div className="new-student-icon" style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '4rem',
-          height: '4rem',
           borderRadius: '1rem',
           background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
           marginBottom: '1rem'
         }}>
           <User size={24} color="white" />
         </div>
-        <h1 style={{
-          fontSize: '2rem',
+        <h1 className="new-student-title" style={{
           fontWeight: 'bold',
           color: 'white',
           marginBottom: '0.5rem'
         }}>
           Adicionar Novo Aluno
         </h1>
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '1rem'
+        <p className="new-student-subtitle" style={{
+          color: '#94a3b8'
         }}>
           Preencha os dados do novo aluno
         </p>
       </div>
 
       {/* Formulário */}
-      <form onSubmit={handleSubmit} style={{
+      <form onSubmit={handleSubmit} className="new-student-form" style={{
         backgroundColor: 'rgba(2, 6, 23, 0.8)',
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem',
-        padding: '2rem'
+        borderRadius: '1rem'
       }}>
         {/* Nome */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{
+        <div className="new-student-form-group">
+          <label className="new-student-label" style={{
             display: 'block',
             color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
+            fontWeight: '500'
           }}>
             Nome Completo *
           </label>
@@ -196,6 +176,7 @@ const NewStudent: React.FC = () => {
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               autoComplete="name"
+              className="new-student-input"
               style={{
               width: '100%',
               padding: '0.75rem',
@@ -217,13 +198,8 @@ const NewStudent: React.FC = () => {
             placeholder="Digite o nome completo"
           />
           {errors.name && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginTop: '0.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
+            <div className="new-student-error" style={{
+              color: '#fca5a5'
             }}>
               <X size={12} />
               {errors.name}
@@ -234,27 +210,24 @@ const NewStudent: React.FC = () => {
 
 
         {/* Código de Acesso */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{
+        <div className="new-student-form-group">
+          <label className="new-student-label" style={{
             display: 'block',
             color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
+            fontWeight: '500'
           }}>
             Código de Acesso *
           </label>
-          <div style={{
-            display: 'flex',
-            gap: '0.75rem'
+          <div className="new-student-code-section" style={{
+            display: 'flex'
           }}>
             <input
               type="text"
               value={formData.accessCode}
               onChange={(e) => handleInputChange('accessCode', e.target.value.toUpperCase())}
               autoComplete="off"
+              className="new-student-input new-student-code-input"
               style={{
-                flex: 1,
                 padding: '0.75rem',
                 backgroundColor: 'rgba(15, 23, 42, 0.8)',
                 border: `1px solid ${errors.accessCode ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
@@ -277,20 +250,15 @@ const NewStudent: React.FC = () => {
             <button
               type="button"
               onClick={generateAccessCode}
+              className="new-student-generate-btn"
               style={{
                 background: 'rgba(59, 130, 246, 0.1)',
                 border: '1px solid rgba(59, 130, 246, 0.3)',
                 color: '#60a5fa',
-                padding: '0.75rem',
                 borderRadius: '0.5rem',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.875rem',
                 fontWeight: '500',
-                transition: 'all 0.3s',
-                whiteSpace: 'nowrap'
+                transition: 'all 0.3s'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
@@ -306,35 +274,26 @@ const NewStudent: React.FC = () => {
             </button>
           </div>
           {errors.accessCode && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginTop: '0.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
+            <div className="new-student-error" style={{
+              color: '#fca5a5'
             }}>
               <X size={12} />
               {errors.accessCode}
             </div>
           )}
-          <p style={{
-            color: '#64748b',
-            fontSize: '0.75rem',
-            marginTop: '0.5rem'
+          <p className="new-student-help-text" style={{
+            color: '#64748b'
           }}>
             Este código será usado pelo aluno para acessar seus treinos
           </p>
         </div>
 
         {/* Observações */}
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{
+        <div className="new-student-form-group">
+          <label className="new-student-label" style={{
             display: 'block',
             color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
+            fontWeight: '500'
           }}>
             Observações
           </label>
@@ -342,6 +301,7 @@ const NewStudent: React.FC = () => {
             value={formData.notes}
             onChange={(e) => handleInputChange('notes', e.target.value)}
             rows={3}
+            className="new-student-textarea"
             style={{
               width: '100%',
               padding: '0.75rem',
@@ -350,7 +310,6 @@ const NewStudent: React.FC = () => {
               borderRadius: '0.5rem',
               color: 'white',
               fontSize: '1rem',
-              resize: 'vertical',
               transition: 'all 0.3s',
               fontFamily: 'inherit'
             }}
@@ -367,22 +326,19 @@ const NewStudent: React.FC = () => {
         </div>
 
         {/* Botões */}
-        <div style={{
+        <div className="new-student-actions" style={{
           display: 'flex',
-          gap: '1rem',
           justifyContent: 'flex-end'
         }}>
           <Link
             to="/dashboard/students"
+            className="new-student-cancel-link"
             style={{
               border: '1px solid rgba(148, 163, 184, 0.3)',
               color: '#94a3b8',
-              padding: '0.75rem 1.5rem',
               borderRadius: '0.5rem',
               textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              transition: 'all 0.3s'
+              fontWeight: '500'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
@@ -399,21 +355,16 @@ const NewStudent: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
+            className="new-student-submit-btn"
             style={{
               background: loading 
                 ? 'rgba(59, 130, 246, 0.3)' 
                 : 'linear-gradient(135deg, #3b82f6, #1e40af)',
               color: 'white',
               border: 'none',
-              padding: '0.75rem 1.5rem',
               borderRadius: '0.5rem',
               cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.3s'
+              fontWeight: '500'
             }}
             onMouseEnter={(e) => {
               if (!loading) {
@@ -428,14 +379,7 @@ const NewStudent: React.FC = () => {
           >
             {loading ? (
               <>
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
+                <div className="new-student-loading-spinner"></div>
                 Salvando...
               </>
             ) : (

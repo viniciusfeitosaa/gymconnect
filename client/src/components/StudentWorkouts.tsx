@@ -213,359 +213,127 @@ const StudentWorkouts: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #020617 0%, #0c1421 25%, #1e293b 50%, #0c1421 75%, #020617 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          color: 'white'
-        }}>
-          <div style={{
-            width: '50px',
-            height: '50px',
-            border: '3px solid transparent',
-            borderTop: '3px solid #3b82f6',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }}></div>
-          <p>Carregando seus treinos...</p>
+      <div className="student-workouts-loading">
+        <div className="student-workouts-loading-content">
+          <div className="student-workouts-loading-spinner"></div>
+          <p className="student-workouts-loading-text">Carregando seus treinos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #020617 0%, #0c1421 25%, #1e293b 50%, #0c1421 75%, #020617 100%)',
-      padding: '2rem',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div className="student-workouts-container">
       {/* Background Elements */}
-      <div style={{
-        position: 'absolute',
-        top: '-50%',
-        right: '-50%',
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)',
-        animation: 'pulse 4s ease-in-out infinite alternate'
-      }}></div>
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '-50%',
-        left: '-50%',
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.08) 0%, transparent 70%)',
-        animation: 'pulse 4s ease-in-out infinite alternate-reverse'
-      }}></div>
+      <div className="student-workouts-background"></div>
+      <div className="student-workouts-background-secondary"></div>
 
       {/* Header */}
-      <div style={{
-        position: 'relative',
-        zIndex: 10,
-        marginBottom: '2rem'
-      }}>
+      <div className="student-workouts-header">
         {/* Back Button */}
         <button
           onClick={() => navigate('/register')}
-          style={{
-            background: 'rgba(2, 6, 23, 0.95)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-            borderRadius: '0.75rem',
-            padding: '0.75rem 1rem',
-            color: '#e2e8f0',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            transition: 'all 0.3s',
-            marginBottom: '2rem'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-            e.currentTarget.style.backgroundColor = 'rgba(2, 6, 23, 0.98)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-            e.currentTarget.style.backgroundColor = 'rgba(2, 6, 23, 0.95)';
-          }}
+          className="student-workouts-back-btn"
         >
           <ArrowLeft size={20} />
           Voltar
         </button>
 
         {/* Student Info */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '5rem',
-            height: '5rem',
-            borderRadius: '1.5rem',
-            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-            marginBottom: '1rem',
-            boxShadow: '0 25px 50px rgba(59, 130, 246, 0.3)'
-          }}>
+        <div className="student-workouts-student-info">
+          <div className="student-workouts-avatar">
             <User size={40} color="white" />
           </div>
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '0.5rem'
-          }}>
+          <h1 className="student-workouts-title">
             Olá, {studentName}!
           </h1>
-          <p style={{
-            color: '#94a3b8',
-            fontSize: '1.125rem'
-          }}>
+          <p className="student-workouts-subtitle">
             Código de acesso: <strong>{accessCode}</strong>
           </p>
         </div>
       </div>
 
       {/* Workouts List */}
-      <div style={{
-        position: 'relative',
-        zIndex: 10,
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        <h2 style={{
-          color: '#f1f5f9',
-          fontSize: '1.5rem',
-          fontWeight: '600',
-          marginBottom: '1.5rem',
-          textAlign: 'center'
-        }}>
+      <div className="student-workouts-content">
+        <h2 className="student-workouts-section-title">
           Seus Treinos
         </h2>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '2rem'
-        }}>
+        <div className="student-workouts-grid">
           {workouts.map((workout) => (
             <div
               key={workout.id}
-              style={{
-                backgroundColor: 'rgba(2, 6, 23, 0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                borderRadius: '1.5rem',
-                padding: '2rem',
-                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-              }}
+              className="student-workouts-card"
             >
               {/* Workout Header */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '1.5rem'
-              }}>
-                <div style={{
-                  width: '3rem',
-                  height: '3rem',
-                  borderRadius: '1rem',
-                  background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+              <div className="student-workouts-card-header">
+                <div className="student-workouts-card-icon">
                   <Dumbbell size={24} color="white" />
                 </div>
-                <div>
-                  <h3 style={{
-                    color: '#f1f5f9',
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    marginBottom: '0.25rem'
-                  }}>
+                <div className="student-workouts-card-info">
+                  <h3 className="student-workouts-card-title">
                     {workout.name}
                   </h3>
-                  <p style={{
-                    color: '#94a3b8',
-                    fontSize: '0.875rem'
-                  }}>
+                  <p className="student-workouts-card-description">
                     {workout.description}
                   </p>
                 </div>
               </div>
 
               {/* Workout Info */}
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                marginBottom: '1.5rem',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: '#94a3b8',
-                  fontSize: '0.875rem'
-                }}>
+              <div className="student-workouts-card-meta">
+                <div className="student-workouts-meta-item">
                   <Calendar size={16} />
                   {new Date(workout.created_at).toLocaleDateString('pt-BR')}
                 </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: '#94a3b8',
-                  fontSize: '0.875rem'
-                }}>
+                <div className="student-workouts-meta-item">
                   <Target size={16} />
                   {workout.exercises.length} exercícios
                 </div>
               </div>
 
               {/* Exercises List */}
-              <div>
-                <h4 style={{
-                  color: '#e2e8f0',
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
+              <div className="student-workouts-exercises-section">
+                <h4 className="student-workouts-exercises-title">
                   <TrendingUp size={18} />
                   Exercícios
                 </h4>
                 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
+                <div className="student-workouts-exercises-list">
                   {workout.exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      style={{
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
-                        borderRadius: '0.75rem',
-                        padding: '1rem',
-                        transition: 'all 0.3s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                        e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
-                        e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-                      }}
+                      className="student-workouts-exercise"
                     >
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        marginBottom: '0.5rem'
-                      }}>
-                        <h5 style={{
-                          color: '#f1f5f9',
-                          fontSize: '1rem',
-                          fontWeight: '500',
-                          flex: 1
-                        }}>
+                      <div className="student-workouts-exercise-header">
+                        <h5 className="student-workouts-exercise-name">
                           {exercise.name}
                         </h5>
-                        <div style={{
-                          display: 'flex',
-                          gap: '0.5rem',
-                          flexWrap: 'wrap'
-                        }}>
-                          <span style={{
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            color: '#93c5fd',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '0.5rem',
-                            fontSize: '0.75rem',
-                            fontWeight: '500'
-                          }}>
+                        <div className="student-workouts-exercise-badges">
+                          <span className="student-workouts-badge student-workouts-badge-sets">
                             {exercise.sets} séries
                           </span>
-                          <span style={{
-                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
-                            color: '#86efac',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '0.5rem',
-                            fontSize: '0.75rem',
-                            fontWeight: '500'
-                          }}>
+                          <span className="student-workouts-badge student-workouts-badge-reps">
                             {exercise.reps} reps
                           </span>
                         </div>
                       </div>
                       
-                      <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        flexWrap: 'wrap',
-                        fontSize: '0.875rem'
-                      }}>
+                      <div className="student-workouts-exercise-details">
                         {exercise.weight && (
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.25rem',
-                            color: '#94a3b8'
-                          }}>
+                          <div className="student-workouts-detail-item">
                             <Dumbbell size={14} />
                             {exercise.weight}
                           </div>
                         )}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          color: '#94a3b8'
-                        }}>
+                        <div className="student-workouts-detail-item">
                           <Clock size={14} />
                           Descanso: {exercise.rest}
                         </div>
                       </div>
                       
                       {exercise.notes && (
-                        <p style={{
-                          color: '#cbd5e1',
-                          fontSize: '0.875rem',
-                          marginTop: '0.5rem',
-                          fontStyle: 'italic'
-                        }}>
+                        <p className="student-workouts-exercise-notes">
                           💡 {exercise.notes}
                         </p>
                       )}
@@ -579,29 +347,13 @@ const StudentWorkouts: React.FC = () => {
 
         {/* No Workouts Message */}
         {workouts.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '3rem',
-            color: '#94a3b8'
-          }}>
-            <Dumbbell size={64} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-            <h3 style={{ marginBottom: '0.5rem' }}>Nenhum treino encontrado</h3>
+          <div className="student-workouts-empty">
+            <Dumbbell size={64} />
+            <h3>Nenhum treino encontrado</h3>
             <p>Entre em contato com seu personal trainer para receber seus treinos.</p>
           </div>
         )}
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0% { opacity: 0.2; }
-          100% { opacity: 0.4; }
-        }
-        
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

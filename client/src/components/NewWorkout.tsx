@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Dumbbell, Save, X, Plus, Trash2 } from 'lucide-react';
+import './NewWorkout.css';
 
 interface Exercise {
   id: number;
@@ -217,37 +218,12 @@ const NewWorkout: React.FC = () => {
   };
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '900px',
-      margin: '0 auto'
-    }}>
+    <div className="new-workout-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
+      <div className="new-workout-header">
         <Link
           to="/dashboard/workouts"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: '#94a3b8',
-            textDecoration: 'none',
-            fontSize: '0.875rem',
-            transition: 'color 0.3s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#e2e8f0';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#94a3b8';
-          }}
+          className="new-workout-back-link"
         >
           <ArrowLeft size={16} />
           Voltar aos Treinos
@@ -255,55 +231,23 @@ const NewWorkout: React.FC = () => {
       </div>
 
       {/* Título */}
-      <div style={{
-        marginBottom: '2rem',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '4rem',
-          height: '4rem',
-          borderRadius: '1rem',
-          background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-          marginBottom: '1rem'
-        }}>
+      <div className="new-workout-title-section">
+        <div className="new-workout-icon">
           <Dumbbell size={24} color="white" />
         </div>
-        <h1 style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          color: 'white',
-          marginBottom: '0.5rem'
-        }}>
+        <h1 className="new-workout-title">
           Criar Novo Treino
         </h1>
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '1rem'
-        }}>
+        <p className="new-workout-subtitle">
           Configure o treino para seu aluno
         </p>
       </div>
 
       {/* Formulário */}
-      <form onSubmit={handleSubmit} style={{
-        backgroundColor: 'rgba(2, 6, 23, 0.8)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem',
-        padding: '2rem'
-      }}>
+      <form onSubmit={handleSubmit} className="new-workout-form">
         {/* Nome do Treino */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+        <div className="new-workout-form-group">
+          <label className="new-workout-label">
             Nome do Treino *
           </label>
           <input
@@ -311,15 +255,9 @@ const NewWorkout: React.FC = () => {
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             autoComplete="off"
+            className="new-workout-input"
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: `1px solid ${errors.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              transition: 'all 0.3s'
+              border: `1px solid ${errors.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`
             }}
             onFocus={(e) => {
               e.target.style.borderColor = errors.name ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
@@ -332,14 +270,7 @@ const NewWorkout: React.FC = () => {
             placeholder="Ex: Treino A - Força Superior"
           />
           {errors.name && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginTop: '0.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div className="new-workout-error">
               <X size={12} />
               {errors.name}
             </div>
@@ -347,31 +278,17 @@ const NewWorkout: React.FC = () => {
         </div>
 
         {/* Descrição */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+        <div className="new-workout-form-group">
+          <label className="new-workout-label">
             Descrição *
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={3}
+            className="new-workout-textarea"
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: `1px solid ${errors.description ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              resize: 'vertical',
-              transition: 'all 0.3s',
-              fontFamily: 'inherit'
+              border: `1px solid ${errors.description ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`
             }}
             onFocus={(e) => {
               e.target.style.borderColor = errors.description ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
@@ -384,14 +301,7 @@ const NewWorkout: React.FC = () => {
             placeholder="Descreva o objetivo e foco do treino"
           />
           {errors.description && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginTop: '0.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div className="new-workout-error">
               <X size={12} />
               {errors.description}
             </div>
@@ -399,28 +309,16 @@ const NewWorkout: React.FC = () => {
         </div>
 
         {/* Seleção de Aluno */}
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+        <div className="new-workout-form-group">
+          <label className="new-workout-label">
             Aluno *
           </label>
           <select
             value={formData.studentId}
             onChange={(e) => handleInputChange('studentId', e.target.value)}
+            className="new-workout-select"
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: `1px solid ${errors.studentId ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              transition: 'all 0.3s'
+              border: `1px solid ${errors.studentId ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`
             }}
             onFocus={(e) => {
               e.target.style.borderColor = errors.studentId ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
@@ -439,14 +337,7 @@ const NewWorkout: React.FC = () => {
             ))}
           </select>
           {errors.studentId && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginTop: '0.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div className="new-workout-error">
               <X size={12} />
               {errors.studentId}
             </div>
@@ -454,45 +345,15 @@ const NewWorkout: React.FC = () => {
         </div>
 
         {/* Seção de Exercícios */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1rem'
-          }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: 'white'
-            }}>
+        <div className="new-workout-exercises-section">
+          <div className="new-workout-exercises-header">
+            <h3 className="new-workout-exercises-title">
               Exercícios
             </h3>
             <button
               type="button"
               onClick={addExercise}
-              style={{
-                background: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                color: '#4ade80',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
-                e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-              }}
+              className="new-workout-add-exercise-btn"
             >
               <Plus size={16} />
               Adicionar Exercício
@@ -500,164 +361,80 @@ const NewWorkout: React.FC = () => {
           </div>
 
           {errors.exercises && (
-            <div style={{
-              color: '#fca5a5',
-              fontSize: '0.75rem',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div className="new-workout-error" style={{ marginBottom: '1rem' }}>
               <X size={12} />
               <span>{errors.exercises}</span>
             </div>
           )}
 
           {formData.exercises.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '2rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderRadius: '0.5rem',
-              color: '#64748b'
-            }}>
+            <div className="new-workout-empty-exercises">
               <Dumbbell size={32} style={{ marginBottom: '0.5rem' }} />
               <p>Nenhum exercício adicionado</p>
               <p style={{ fontSize: '0.75rem' }}>Clique em "Adicionar Exercício" para começar</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="new-workout-exercises-list">
               {formData.exercises.map((exercise, index) => (
                 <div
                   key={exercise.id}
-                  style={{
-                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                    borderRadius: '0.75rem',
-                    padding: '1.5rem',
-                    position: 'relative'
-                  }}
+                  className="new-workout-exercise-card"
                 >
                   {/* Header do exercício */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '1rem'
-                  }}>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '600'
-                    }}>
+                  <div className="new-workout-exercise-header">
+                    <h4 className="new-workout-exercise-title">
                       Exercício {index + 1}
                     </h4>
                     <button
                       type="button"
                       onClick={() => removeExercise(exercise.id)}
-                      style={{
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        color: '#fca5a5',
-                        padding: '0.25rem',
-                        borderRadius: '0.25rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
-                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                      }}
+                      className="new-workout-remove-exercise-btn"
                     >
                       <Trash2 size={14} />
                     </button>
                   </div>
 
                   {/* Campos do exercício */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '1rem'
-                  }}>
+                  <div className="new-workout-exercise-fields">
                     {/* Nome do exercício */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field">
+                      <label className="new-workout-exercise-label">
                         Nome *
                       </label>
                       <input
                         type="text"
                         value={exercise.name}
                         onChange={(e) => updateExercise(exercise.id, 'name', e.target.value)}
+                        className="new-workout-exercise-input"
                         style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: `1px solid ${exerciseErrors[exercise.id]?.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`,
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem'
+                          border: `1px solid ${exerciseErrors[exercise.id]?.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`
                         }}
                         placeholder="Nome do exercício"
                       />
                       {exerciseErrors[exercise.id]?.name && (
-                        <div style={{
-                          color: '#fca5a5',
-                          fontSize: '0.625rem',
-                          marginTop: '0.25rem'
-                        }}>
+                        <div className="new-workout-exercise-error">
                           {exerciseErrors[exercise.id].name}
                         </div>
                       )}
                     </div>
 
                     {/* Peso */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field">
+                      <label className="new-workout-exercise-label">
                         Peso
                       </label>
                       <input
                         type="text"
                         value={exercise.weight}
                         onChange={(e) => updateExercise(exercise.id, 'weight', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: '1px solid rgba(59, 130, 246, 0.2)',
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem'
-                        }}
+                        className="new-workout-exercise-input"
                         placeholder="Ex: 60kg"
                       />
                     </div>
 
                     {/* Séries */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field">
+                      <label className="new-workout-exercise-label">
                         Séries *
                       </label>
                       <input
@@ -665,35 +442,21 @@ const NewWorkout: React.FC = () => {
                         min="1"
                         value={exercise.sets}
                         onChange={(e) => updateExercise(exercise.id, 'sets', parseInt(e.target.value))}
+                        className="new-workout-exercise-input"
                         style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: `1px solid ${exerciseErrors[exercise.id]?.sets ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`,
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem'
+                          border: `1px solid ${exerciseErrors[exercise.id]?.sets ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`
                         }}
                       />
                       {exerciseErrors[exercise.id]?.sets && (
-                        <div style={{
-                          color: '#fca5a5',
-                          fontSize: '0.625rem',
-                          marginTop: '0.25rem'
-                        }}>
+                        <div className="new-workout-exercise-error">
                           {exerciseErrors[exercise.id].sets}
                         </div>
                       )}
                     </div>
 
                     {/* Repetições */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field">
+                      <label className="new-workout-exercise-label">
                         Repetições *
                       </label>
                       <input
@@ -701,79 +464,42 @@ const NewWorkout: React.FC = () => {
                         min="1"
                         value={exercise.reps}
                         onChange={(e) => updateExercise(exercise.id, 'reps', parseInt(e.target.value))}
+                        className="new-workout-exercise-input"
                         style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: `1px solid ${exerciseErrors[exercise.id]?.reps ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`,
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem'
+                          border: `1px solid ${exerciseErrors[exercise.id]?.reps ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)'}`
                         }}
                       />
                       {exerciseErrors[exercise.id]?.reps && (
-                        <div style={{
-                          color: '#fca5a5',
-                          fontSize: '0.625rem',
-                          marginTop: '0.25rem'
-                        }}>
+                        <div className="new-workout-exercise-error">
                           {exerciseErrors[exercise.id].reps}
                         </div>
                       )}
                     </div>
 
                     {/* Descanso */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field">
+                      <label className="new-workout-exercise-label">
                         Descanso
                       </label>
                       <input
                         type="text"
                         value={exercise.rest}
                         onChange={(e) => updateExercise(exercise.id, 'rest', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: '1px solid rgba(59, 130, 246, 0.2)',
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem'
-                        }}
+                        className="new-workout-exercise-input"
                         placeholder="Ex: 2 min"
                       />
                     </div>
 
                     {/* Observações */}
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{
-                        display: 'block',
-                        color: '#94a3b8',
-                        fontSize: '0.75rem',
-                        marginBottom: '0.25rem'
-                      }}>
+                    <div className="new-workout-exercise-field full-width">
+                      <label className="new-workout-exercise-label">
                         Observações
                       </label>
                       <textarea
                         value={exercise.notes}
                         onChange={(e) => updateExercise(exercise.id, 'notes', e.target.value)}
                         rows={2}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          backgroundColor: 'rgba(2, 6, 23, 0.8)',
-                          border: '1px solid rgba(59, 130, 246, 0.2)',
-                          borderRadius: '0.375rem',
-                          color: 'white',
-                          fontSize: '0.875rem',
-                          resize: 'vertical',
-                          fontFamily: 'inherit'
-                        }}
+                        className="new-workout-exercise-textarea"
                         placeholder="Dicas de execução, técnica, etc."
                       />
                     </div>
@@ -785,31 +511,10 @@ const NewWorkout: React.FC = () => {
         </div>
 
         {/* Botões */}
-        <div style={{
-          display: 'flex',
-          gap: '1rem',
-          justifyContent: 'flex-end'
-        }}>
+        <div className="new-workout-actions">
           <Link
             to="/dashboard/workouts"
-            style={{
-              border: '1px solid rgba(148, 163, 184, 0.3)',
-              color: '#94a3b8',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.5rem',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
-            }}
+            className="new-workout-cancel-link"
           >
             Cancelar
           </Link>
@@ -817,43 +522,16 @@ const NewWorkout: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
+            className="new-workout-submit-btn"
             style={{
               background: loading 
                 ? 'rgba(59, 130, 246, 0.3)' 
-                : 'linear-gradient(135deg, #3b82f6, #1e40af)',
-              color: 'white',
-              border: 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.5rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'scale(1.02)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'scale(1)';
-              }
+                : 'linear-gradient(135deg, #3b82f6, #1e40af)'
             }}
           >
             {loading ? (
               <>
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
+                <div className="new-workout-loading-spinner"></div>
                 Salvando...
               </>
             ) : (
@@ -865,13 +543,6 @@ const NewWorkout: React.FC = () => {
           </button>
         </div>
       </form>
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

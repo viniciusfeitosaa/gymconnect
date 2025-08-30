@@ -1,0 +1,361 @@
+/* Responsividade para NewStudent */
+
+/* Mobile First */
+.new-student-container {
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.new-student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.new-student-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.2;
+}
+
+.new-student-subtitle {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.new-student-icon {
+  width: clamp(3rem, 8vw, 4rem);
+  height: clamp(3rem, 8vw, 4rem);
+}
+
+.new-student-form {
+  padding: clamp(1rem, 4vw, 2rem);
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.new-student-form-group {
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.new-student-label {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  margin-bottom: 0.5rem;
+  display: block;
+  color: white;
+  font-weight: 500;
+}
+
+.new-student-input {
+  font-size: 16px !important; /* Previne zoom no iOS */
+  width: 100%;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  box-sizing: border-box;
+}
+
+.new-student-textarea {
+  font-size: 16px !important; /* Previne zoom no iOS */
+  width: 100%;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  box-sizing: border-box;
+}
+
+.new-student-code-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.new-student-code-input {
+  width: 100%;
+  flex: 1;
+}
+
+.new-student-generate-btn {
+  width: 100%;
+  justify-content: center;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.new-student-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.new-student-actions button,
+.new-student-actions a {
+  width: 100%;
+  justify-content: center;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.new-student-error {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  margin-top: 0.25rem;
+}
+
+.new-student-help-text {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Mobile Landscape */
+@media (min-width: 480px) {
+  .new-student-container {
+    padding: 1.25rem;
+  }
+  
+  .new-student-form {
+    padding: clamp(1.25rem, 4vw, 2rem);
+  }
+  
+  .new-student-code-section {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+  
+  .new-student-code-input {
+    flex: 1;
+  }
+  
+  .new-student-generate-btn {
+    width: auto;
+    flex-shrink: 0;
+    min-width: 120px;
+  }
+  
+  .new-student-actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .new-student-actions button,
+  .new-student-actions a {
+    width: auto;
+    flex: 1;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .new-student-container {
+    padding: 1.5rem;
+  }
+  
+  .new-student-header {
+    margin-bottom: 2rem;
+  }
+  
+  .new-student-form {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .new-student-form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .new-student-generate-btn {
+    min-width: 140px;
+  }
+  
+  .new-student-actions {
+    margin-top: 1.5rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .new-student-container {
+    padding: 2rem;
+  }
+  
+  .new-student-form {
+    padding: clamp(2rem, 4vw, 3rem);
+    max-width: 700px;
+  }
+  
+  .new-student-generate-btn {
+    min-width: 160px;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+  .new-student-container {
+    padding: 3rem;
+  }
+  
+  .new-student-form {
+    padding: clamp(2.5rem, 4vw, 3.5rem);
+    max-width: 800px;
+  }
+}
+
+/* Melhorias para telas muito pequenas */
+@media (max-width: 320px) {
+  .new-student-container {
+    padding: 0.5rem;
+  }
+  
+  .new-student-form {
+    padding: 0.75rem;
+  }
+  
+  .new-student-form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .new-student-actions {
+    gap: 0.5rem;
+  }
+  
+  .new-student-generate-btn {
+    min-width: 100px;
+  }
+}
+
+/* Melhorias para inputs em mobile */
+@media (max-width: 768px) {
+  .new-student-input,
+  .new-student-textarea {
+    font-size: 16px !important; /* Previne zoom no iOS */
+  }
+}
+
+/* Melhorias para o botão de gerar código */
+.new-student-generate-btn {
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  outline: none;
+}
+
+/* Melhorias para o textarea */
+.new-student-textarea {
+  resize: vertical;
+  min-height: clamp(80px, 15vw, 120px);
+  font-family: inherit;
+}
+
+/* Melhorias para mensagens de erro */
+.new-student-error {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Melhorias para o loading spinner */
+.new-student-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Melhorias para o botão de submit */
+.new-student-submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  border: none;
+  outline: none;
+}
+
+.new-student-submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.new-student-submit-btn:not(:disabled):hover {
+  transform: scale(1.02);
+}
+
+/* Melhorias para o link de voltar */
+.new-student-back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s;
+}
+
+.new-student-back-link:hover {
+  color: #e2e8f0;
+}
+
+/* Melhorias para o link de cancelar */
+.new-student-cancel-link {
+  transition: all 0.3s;
+  border: none;
+  outline: none;
+}
+
+.new-student-cancel-link:hover {
+  background-color: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Melhorias gerais para o formulário */
+.new-student-form {
+  background-color: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Melhorias para inputs e textarea */
+.new-student-input,
+.new-student-textarea {
+  background-color: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.new-student-input:focus,
+.new-student-textarea:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  background-color: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Melhorias para botões */
+.new-student-generate-btn,
+.new-student-submit-btn,
+.new-student-cancel-link {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.new-student-generate-btn:hover,
+.new-student-submit-btn:hover,
+.new-student-cancel-link:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
