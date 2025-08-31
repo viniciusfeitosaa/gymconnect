@@ -14,7 +14,7 @@ interface Exercise {
 interface Student {
   id: string;
   name: string;
-  accessCode: string;
+  access_code: string;
 }
 
 const CreateWorkout: React.FC = () => {
@@ -220,7 +220,7 @@ const CreateWorkout: React.FC = () => {
           color: '#94a3b8',
           fontSize: '1rem'
         }}>
-          Para {student.name} ({student.accessCode})
+          Para {student.name} ({student.access_code})
         </p>
       </div>
 

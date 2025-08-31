@@ -27,6 +27,17 @@ async function createTables() {
       )
     `);
 
+    // Tabela users (alias para personal_trainers para compatibilidade)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Tabela de alunos
     await pool.query(`
       CREATE TABLE IF NOT EXISTS students (
@@ -96,6 +107,12 @@ app.post('/api/auth/register', async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO personal_trainers (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+      [name, email, hashedPassword]
+    );
+
+    // Também inserir na tabela users para compatibilidade
+    await pool.query(
+      'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
       [name, email, hashedPassword]
     );
 
@@ -177,7 +194,7 @@ app.get('/api/students', authenticateToken, async (req, res) => {
       [personalId]
     );
 
-    res.json(result.rows);
+    res.json({ students: result.rows });
   } catch (error) {
     console.error('Erro ao buscar alunos:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -310,6 +327,31 @@ app.get('/api/health', async (req, res) => {
       database: 'PostgreSQL (Neon) - Disconnected',
       error: error.message
     });
+  }
+});
+
+// Rota para verificar usuários no banco (PROTEGIDA)
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+  try {
+    // Buscar usuários da tabela personal_trainers
+    const personalTrainersResult = await pool.query(
+      'SELECT id, name, email, created_at FROM personal_trainers ORDER BY created_at DESC'
+    );
+    
+    // Buscar usuários da tabela users
+    const usersResult = await pool.query(
+      'SELECT id, name, email, created_at FROM users ORDER BY created_at DESC'
+    );
+    
+    res.json({
+      personal_trainers: personalTrainersResult.rows,
+      users: usersResult.rows,
+      total_personal_trainers: personalTrainersResult.rows.length,
+      total_users: usersResult.rows.length
+    });
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 

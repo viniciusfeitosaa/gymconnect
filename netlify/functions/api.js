@@ -16,9 +16,20 @@ const pool = new Pool({
 // Criar tabelas se não existirem
 async function createTables() {
   try {
-    // Tabela de personal trainers
+    // Tabela de personal trainers (users)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS personal_trainers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Tabela users (alias para personal_trainers para compatibilidade)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -124,18 +135,79 @@ exports.handler = async (event, context) => {
 
     // Rota para health check detalhado
     if (urlPath === '/health' && httpMethod === 'GET') {
-      const health = {
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'production',
-        version: '1.0.0'
-      };
+      try {
+        // Testar conexão com banco
+        await pool.query('SELECT 1');
+        
+        const health = {
+          status: 'OK',
+          timestamp: new Date().toISOString(),
+          environment: process.env.NODE_ENV || 'production',
+          version: '1.0.0',
+          database: 'PostgreSQL (Neon) - Connected'
+        };
+        
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify(health)
+        };
+      } catch (error) {
+        return {
+          statusCode: 503,
+          headers,
+          body: JSON.stringify({
+            status: 'ERROR',
+            timestamp: new Date().toISOString(),
+            database: 'PostgreSQL (Neon) - Disconnected',
+            error: error.message
+          })
+        };
+      }
+    }
+
+    // Rota para verificar usuários no banco (PROTEGIDA)
+    if (urlPath === '/admin/users' && httpMethod === 'GET') {
+      const token = requestHeaders.authorization?.split(' ')[1];
+      const user = authenticateToken(token);
       
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(health)
-      };
+      if (!user) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Token de acesso necessário' })
+        };
+      }
+
+      try {
+        // Buscar usuários da tabela personal_trainers
+        const personalTrainersResult = await pool.query(
+          'SELECT id, name, email, created_at FROM personal_trainers ORDER BY created_at DESC'
+        );
+        
+        // Buscar usuários da tabela users
+        const usersResult = await pool.query(
+          'SELECT id, name, email, created_at FROM users ORDER BY created_at DESC'
+        );
+        
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            personal_trainers: personalTrainersResult.rows,
+            users: usersResult.rows,
+            total_personal_trainers: personalTrainersResult.rows.length,
+            total_users: usersResult.rows.length
+          })
+        };
+      } catch (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: 'Erro interno do servidor' })
+        };
+      }
     }
 
     // Rota para registro de novos personais
@@ -157,9 +229,15 @@ exports.handler = async (event, context) => {
         // Hash da senha com bcrypt
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Inserir no banco PostgreSQL
+        // Inserir no banco PostgreSQL (tabela personal_trainers)
         const result = await pool.query(
           'INSERT INTO personal_trainers (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+          [name, email, hashedPassword]
+        );
+
+        // Também inserir na tabela users para compatibilidade
+        await pool.query(
+          'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
           [name, email, hashedPassword]
         );
 
@@ -349,7 +427,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify(result.rows)
+          body: JSON.stringify({ students: result.rows })
         };
       } catch (error) {
         console.error('Erro ao buscar alunos:', error);

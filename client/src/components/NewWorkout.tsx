@@ -39,7 +39,7 @@ interface ExerciseErrors {
 interface Student {
   id: string;
   name: string;
-  accessCode: string;
+  access_code: string;
 }
 
 const NewWorkout: React.FC = () => {
@@ -332,7 +332,7 @@ const NewWorkout: React.FC = () => {
             <option value="">Selecione um aluno</option>
             {students.map(student => (
               <option key={student.id} value={student.id}>
-                {student.name} ({student.accessCode})
+                {student.name} ({student.access_code})
               </option>
             ))}
           </select>

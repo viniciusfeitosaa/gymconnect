@@ -11,9 +11,24 @@
   GENERATE_SOURCEMAP = "false"
   SKIP_PREFLIGHT_CHECK = "true"
 
-# Redirecionamento para SPA
+# Redirecionamento para SPA (excluindo funções Netlify)
 [[redirects]]
-  from = "/*"
+  from = "/dashboard/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/student-workouts/*"
   to = "/index.html"
   status = 200
 

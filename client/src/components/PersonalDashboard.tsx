@@ -14,7 +14,7 @@ import './PersonalDashboard.css';
 interface Student {
   id: string;
   name: string;
-  accessCode: string;
+  access_code: string;
   workoutCount?: number;
 }
 
@@ -385,7 +385,7 @@ const DashboardHome: React.FC = () => {
                   fontFamily: 'monospace',
                   marginBottom: '0.5rem'
                 }}>
-                  Código: {student.accessCode}
+                  Código: {student.access_code}
                 </div>
                 {student.workoutCount && (
                   <div style={{

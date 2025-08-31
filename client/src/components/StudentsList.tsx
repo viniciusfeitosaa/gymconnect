@@ -6,11 +6,11 @@ import './StudentsList.css';
 interface Student {
   id: string;
   name: string;
-  accessCode: string;
-  joinDate?: string;
-  workoutCount?: number;
-  lastWorkout?: string;
-  status?: string;
+  access_code: string;
+  email?: string;
+  phone?: string;
+  created_at?: string;
+  personal_id?: string;
 }
 
 const StudentsList: React.FC = () => {
@@ -114,7 +114,7 @@ const StudentsList: React.FC = () => {
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.accessCode.toLowerCase().includes(searchTerm.toLowerCase())
+    student.access_code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -368,7 +368,7 @@ const StudentsList: React.FC = () => {
                     color: '#64748b',
                     fontSize: '0.75rem'
                   }}>
-                    {student.joinDate ? `Cadastrado em ${formatDate(student.joinDate)}` : 'Aluno cadastrado'}
+                    {student.created_at ? `Cadastrado em ${formatDate(student.created_at)}` : 'Aluno cadastrado'}
                   </p>
                 </div>
               </div>
@@ -397,21 +397,21 @@ const StudentsList: React.FC = () => {
                       fontFamily: 'monospace',
                       fontWeight: '600'
                     }}>
-                      {student.accessCode}
+                      {student.access_code}
                     </div>
                   </div>
                   <button
-                    onClick={() => copyToClipboard(student.accessCode)}
+                    onClick={() => copyToClipboard(student.access_code)}
                     className="student-copy-btn"
                     style={{
-                      background: copiedCode === student.accessCode 
+                      background: copiedCode === student.access_code 
                         ? 'rgba(34, 197, 94, 0.2)' 
                         : 'rgba(59, 130, 246, 0.1)',
                       border: '1px solid',
-                      borderColor: copiedCode === student.accessCode 
+                      borderColor: copiedCode === student.access_code 
                         ? 'rgba(34, 197, 94, 0.4)' 
                         : 'rgba(59, 130, 246, 0.3)',
-                      color: copiedCode === student.accessCode ? '#4ade80' : '#60a5fa',
+                      color: copiedCode === student.access_code ? '#4ade80' : '#60a5fa',
                       borderRadius: '0.375rem',
                       cursor: 'pointer',
                       display: 'flex',
@@ -420,19 +420,19 @@ const StudentsList: React.FC = () => {
                       transition: 'all 0.3s'
                     }}
                     onMouseEnter={(e) => {
-                      if (copiedCode !== student.accessCode) {
+                      if (copiedCode !== student.access_code) {
                         e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
                         e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (copiedCode !== student.accessCode) {
+                      if (copiedCode !== student.access_code) {
                         e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
                         e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                       }
                     }}
                   >
-                    {copiedCode === student.accessCode ? (
+                    {copiedCode === student.access_code ? (
                       <Check size={16} />
                     ) : (
                       <Copy size={16} />
@@ -444,18 +444,18 @@ const StudentsList: React.FC = () => {
                 <div className="student-details-grid" style={{
                   display: 'grid'
                 }}>
-                  {student.workoutCount && (
+                  {student.email && (
                     <div className="student-detail-item" style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.25rem',
                       color: '#86efac'
                     }}>
-                      <Target className="student-detail-icon" size={12} />
-                      {student.workoutCount} treino{student.workoutCount > 1 ? 's' : ''}
+                      <Users className="student-detail-icon" size={12} />
+                      {student.email}
                     </div>
                   )}
-                  {student.lastWorkout && (
+                  {student.phone && (
                     <div className="student-detail-item" style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -463,7 +463,7 @@ const StudentsList: React.FC = () => {
                       color: '#94a3b8'
                     }}>
                       <Calendar className="student-detail-icon" size={12} />
-                      Último: {formatDate(student.lastWorkout)}
+                      {student.phone}
                     </div>
                   )}
                 </div>

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Target, Save, X } from 'lucide-react';
 import './NewStudent.css';
+import SuccessModal from './SuccessModal';
 
 interface NewStudentForm {
   name: string;
-  accessCode: string;
+  email: string;
+  phone: string;
   notes: string;
 }
 
@@ -13,23 +15,15 @@ const NewStudent: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<NewStudentForm>({
     name: '',
-    accessCode: '',
+    email: '',
+    phone: '',
     notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<NewStudentForm>>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const generateAccessCode = () => {
-    // Gerar código baseado no nome
-    const nameParts = formData.name.trim().split(' ');
-    if (nameParts.length >= 2) {
-      const firstName = nameParts[0].substring(0, 3).toUpperCase();
-      const lastName = nameParts[nameParts.length - 1].substring(0, 3).toUpperCase();
-      const randomNum = Math.floor(Math.random() * 999) + 1;
-      const code = `${firstName}${lastName}${randomNum.toString().padStart(3, '0')}`;
-      setFormData(prev => ({ ...prev, accessCode: code }));
-    }
-  };
+
 
   const validateForm = (): boolean => {
     const newErrors: Partial<NewStudentForm> = {};
@@ -38,10 +32,8 @@ const NewStudent: React.FC = () => {
       newErrors.name = 'Nome é obrigatório';
     }
 
-    if (!formData.accessCode.trim()) {
-      newErrors.accessCode = 'Código de acesso é obrigatório';
-    } else if (formData.accessCode.length < 3) {
-      newErrors.accessCode = 'Código deve ter pelo menos 3 caracteres';
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email inválido';
     }
 
     setErrors(newErrors);
@@ -71,17 +63,14 @@ const NewStudent: React.FC = () => {
         },
         body: JSON.stringify({
           name: formData.name,
-          accessCode: formData.accessCode,
-          notes: formData.notes,
-          joinDate: new Date().toISOString().split('T')[0],
-          status: 'active'
+          email: formData.email,
+          phone: formData.phone
           // personalId vem automaticamente do token JWT
         }),
       });
 
       if (response.ok) {
-        alert('Aluno cadastrado com sucesso!');
-        navigate('/dashboard/students');
+        setShowSuccessModal(true);
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Erro ao cadastrar aluno');
@@ -100,6 +89,11 @@ const NewStudent: React.FC = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/dashboard/students');
   };
 
   return (
@@ -151,7 +145,7 @@ const NewStudent: React.FC = () => {
         <p className="new-student-subtitle" style={{
           color: '#94a3b8'
         }}>
-          Preencha os dados do novo aluno
+          Preencha os dados do novo aluno. O código de acesso será gerado automaticamente.
         </p>
       </div>
 
@@ -209,83 +203,86 @@ const NewStudent: React.FC = () => {
 
 
 
-        {/* Código de Acesso */}
+        {/* Email */}
         <div className="new-student-form-group">
           <label className="new-student-label" style={{
             display: 'block',
             color: 'white',
             fontWeight: '500'
           }}>
-            Código de Acesso *
+            Email
           </label>
-          <div className="new-student-code-section" style={{
-            display: 'flex'
-          }}>
-            <input
-              type="text"
-              value={formData.accessCode}
-              onChange={(e) => handleInputChange('accessCode', e.target.value.toUpperCase())}
-              autoComplete="off"
-              className="new-student-input new-student-code-input"
-              style={{
-                padding: '0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.8)',
-                border: `1px solid ${errors.accessCode ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem',
-                fontFamily: 'monospace',
-                transition: 'all 0.3s'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = errors.accessCode ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
-                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = errors.accessCode ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)';
-                e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
-              }}
-              placeholder="Ex: ANA001"
-            />
-            <button
-              type="button"
-              onClick={generateAccessCode}
-              className="new-student-generate-btn"
-              style={{
-                background: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                color: '#60a5fa',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                fontWeight: '500',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-              }}
-            >
-              <Target size={16} />
-              Gerar
-            </button>
-          </div>
-          {errors.accessCode && (
+          <input
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            autoComplete="email"
+            className="new-student-input"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+              border: `1px solid ${errors.email ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
+              borderRadius: '0.5rem',
+              color: 'white',
+              fontSize: '1rem',
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = errors.email ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = errors.email ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+            }}
+            placeholder="Digite o email do aluno (opcional)"
+          />
+          {errors.email && (
             <div className="new-student-error" style={{
               color: '#fca5a5'
             }}>
               <X size={12} />
-              {errors.accessCode}
+              {errors.email}
             </div>
           )}
-          <p className="new-student-help-text" style={{
-            color: '#64748b'
+        </div>
+
+        {/* Telefone */}
+        <div className="new-student-form-group">
+          <label className="new-student-label" style={{
+            display: 'block',
+            color: 'white',
+            fontWeight: '500'
           }}>
-            Este código será usado pelo aluno para acessar seus treinos
-          </p>
+            Telefone
+          </label>
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            autoComplete="tel"
+            className="new-student-input"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '0.5rem',
+              color: 'white',
+              fontSize: '1rem',
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
+            }}
+            placeholder="Digite o telefone do aluno (opcional)"
+          />
         </div>
 
         {/* Observações */}
@@ -398,6 +395,15 @@ const NewStudent: React.FC = () => {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+
+      {/* Modal de Sucesso */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        title="Aluno Cadastrado!"
+        message="O novo aluno foi cadastrado com sucesso. O código de acesso foi gerado automaticamente e pode ser visualizado na lista de alunos."
+        buttonText="Ver Alunos"
+      />
     </div>
   );
 };
