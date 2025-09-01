@@ -32,6 +32,7 @@
 - [x] Fix server configuration - nodemon was running wrong server file (SQLite instead of PostgreSQL)
 - [x] Add debug logs to dashboard stats route to identify 500 error
 - [x] Fix database structure - recreate students table with correct schema (UUID, personal_id, notes)
+- [x] Verify database structure is correct and all tables have proper schema
 
 ## Pending Tasks 📋
 
@@ -39,3 +40,4 @@
 - [ ] Verify that exercises are properly saved to the database
 - [ ] Test the complete workout creation flow
 - [ ] Test dashboard stats with corrected database structure
+- [ ] Test creating new students in both local and production environments
