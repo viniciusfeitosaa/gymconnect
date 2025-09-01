@@ -11,7 +11,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'gymconnect-secret-key-2024';
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'https://gymconnectt.netlify.app',
+    'https://gymconnect-app.netlify.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

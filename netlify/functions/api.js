@@ -94,9 +94,10 @@ const authenticateToken = (token) => {
 exports.handler = async (event, context) => {
   // Configurar CORS
   const headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://gymconnectt.netlify.app',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true'
   };
 
   // Responder a requisições OPTIONS (preflight)
