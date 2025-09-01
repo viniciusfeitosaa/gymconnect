@@ -179,7 +179,7 @@ app.post('/api/auth/login', async (req, res) => {
 // Rotas de alunos
 app.post('/api/students', authenticateToken, async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, notes } = req.body;
     const personalId = req.user.id;
     
     if (!name) {
@@ -189,8 +189,8 @@ app.post('/api/students', authenticateToken, async (req, res) => {
     const accessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const result = await pool.query(
-      'INSERT INTO students (personal_id, name, email, phone, access_code) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [personalId, name, email || '', phone || '', accessCode]
+      'INSERT INTO students (personal_id, name, access_code, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+      [personalId, name, accessCode, notes || '']
     );
 
     res.json(result.rows[0]);

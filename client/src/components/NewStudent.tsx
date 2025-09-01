@@ -6,8 +6,6 @@ import SuccessModal from './SuccessModal';
 
 interface NewStudentForm {
   name: string;
-  email: string;
-  phone: string;
   notes: string;
 }
 
@@ -15,8 +13,6 @@ const NewStudent: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<NewStudentForm>({
     name: '',
-    email: '',
-    phone: '',
     notes: ''
   });
   const [loading, setLoading] = useState(false);
@@ -30,10 +26,6 @@ const NewStudent: React.FC = () => {
 
     if (!formData.name.trim()) {
       newErrors.name = 'Nome é obrigatório';
-    }
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
     }
 
     setErrors(newErrors);
@@ -63,8 +55,7 @@ const NewStudent: React.FC = () => {
         },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
-          phone: formData.phone
+          notes: formData.notes
           // personalId vem automaticamente do token JWT
         }),
       });
@@ -145,7 +136,7 @@ const NewStudent: React.FC = () => {
         <p className="new-student-subtitle" style={{
           color: '#94a3b8'
         }}>
-          Preencha os dados do novo aluno. O código de acesso será gerado automaticamente.
+          Preencha o nome do novo aluno. O código de acesso será gerado automaticamente.
         </p>
       </div>
 
@@ -203,87 +194,9 @@ const NewStudent: React.FC = () => {
 
 
 
-        {/* Email */}
-        <div className="new-student-form-group">
-          <label className="new-student-label" style={{
-            display: 'block',
-            color: 'white',
-            fontWeight: '500'
-          }}>
-            Email
-          </label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            autoComplete="email"
-            className="new-student-input"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: `1px solid ${errors.email ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              transition: 'all 0.3s'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = errors.email ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
-              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = errors.email ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)';
-              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
-            }}
-            placeholder="Digite o email do aluno (opcional)"
-          />
-          {errors.email && (
-            <div className="new-student-error" style={{
-              color: '#fca5a5'
-            }}>
-              <X size={12} />
-              {errors.email}
-            </div>
-          )}
-        </div>
 
-        {/* Telefone */}
-        <div className="new-student-form-group">
-          <label className="new-student-label" style={{
-            display: 'block',
-            color: 'white',
-            fontWeight: '500'
-          }}>
-            Telefone
-          </label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            autoComplete="tel"
-            className="new-student-input"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              transition: 'all 0.3s'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
-              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-              e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
-            }}
-            placeholder="Digite o telefone do aluno (opcional)"
-          />
-        </div>
+
+
 
         {/* Observações */}
         <div className="new-student-form-group">
@@ -327,28 +240,6 @@ const NewStudent: React.FC = () => {
           display: 'flex',
           justifyContent: 'flex-end'
         }}>
-          <Link
-            to="/dashboard/students"
-            className="new-student-cancel-link"
-            style={{
-              border: '1px solid rgba(148, 163, 184, 0.3)',
-              color: '#94a3b8',
-              borderRadius: '0.5rem',
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
-            }}
-          >
-            Cancelar
-          </Link>
-          
           <button
             type="submit"
             disabled={loading}
@@ -386,6 +277,28 @@ const NewStudent: React.FC = () => {
               </>
             )}
           </button>
+          
+          <Link
+            to="/dashboard/students"
+            className="new-student-cancel-link"
+            style={{
+              border: '1px solid rgba(148, 163, 184, 0.3)',
+              color: '#94a3b8',
+              borderRadius: '0.5rem',
+              textDecoration: 'none',
+              fontWeight: '500'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+            }}
+          >
+            Cancelar
+          </Link>
         </div>
       </form>
 

@@ -17,15 +17,15 @@ interface PersonalProfile {
 
 const PersonalProfile: React.FC = () => {
   const [profile, setProfile] = useState<PersonalProfile>({
-    id: '1',
-    name: 'Personal Trainer',
-    email: 'personal@gymconnect.com',
-    phone: '(11) 99999-1111',
-    location: 'São Paulo, SP',
-    bio: 'Personal trainer dedicado a transformar vidas através do fitness e bem-estar.',
-    specialties: ['Musculação', 'Funcional', 'Emagrecimento'],
-    experience: '5+ anos',
-    certifications: ['CREF 123456-SP', 'Especialização em Biomecânica']
+    id: '',
+    name: '',
+    email: '',
+    phone: 'Não informado',
+    location: 'Não informado',
+    bio: 'Não informado',
+    specialties: ['Não informado'],
+    experience: 'Não informado',
+    certifications: ['Não informado']
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -33,18 +33,53 @@ const PersonalProfile: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Aqui você pode carregar os dados reais do perfil da API
     fetchProfile();
   }, []);
 
   const fetchProfile = async () => {
     try {
-      // Implementar chamada para API quando disponível
-      // const response = await fetch('/api/profile');
-      // const data = await response.json();
-      // setProfile(data);
+      setLoading(true);
+      
+      // Buscar dados do usuário logado
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token não encontrado');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const userData = data.user; // A resposta vem como { user: {...} }
+        
+        // Criar perfil com dados reais do banco
+        const realProfile: PersonalProfile = {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          phone: 'Não informado',
+          location: 'Não informado',
+          bio: 'Não informado',
+          specialties: ['Não informado'],
+          experience: 'Não informado',
+          certifications: ['Não informado']
+        };
+        
+        setProfile(realProfile);
+        setEditedProfile(realProfile);
+      } else {
+        console.error('Erro ao buscar dados do usuário');
+      }
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +138,23 @@ const PersonalProfile: React.FC = () => {
     const newCerts = editedProfile.certifications?.filter((_, i) => i !== index) || [];
     handleInputChange('certifications', newCerts);
   };
+
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          fontSize: '1.2rem',
+          color: '#64748b'
+        }}>
+          Carregando perfil...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">

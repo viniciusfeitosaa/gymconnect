@@ -453,7 +453,7 @@ exports.handler = async (event, context) => {
       }
 
       try {
-        const { name, email, phone } = JSON.parse(body);
+        const { name, notes } = JSON.parse(body);
         const personalId = user.id;
         
         if (!name) {
@@ -467,8 +467,8 @@ exports.handler = async (event, context) => {
         const accessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
         const result = await pool.query(
-          'INSERT INTO students (personal_id, name, email, phone, access_code) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-          [personalId, name, email || '', phone || '', accessCode]
+          'INSERT INTO students (personal_id, name, access_code, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+          [personalId, name, accessCode, notes || '']
         );
 
         return {

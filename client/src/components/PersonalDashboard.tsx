@@ -80,8 +80,6 @@ const DashboardHome: React.FC = () => {
       }
     };
 
-
-
     fetchDashboardData();
   }, []);
 
@@ -489,6 +487,7 @@ const PersonalDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -498,6 +497,36 @@ const PersonalDashboard: React.FC = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // Buscar dados do usuário
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:5000/api/auth/me' 
+          : '/.netlify/functions/api/auth/me';
+        
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Detectar mudanças no tamanho da tela
   useEffect(() => {
@@ -753,7 +782,7 @@ const PersonalDashboard: React.FC = () => {
                    fontSize: '0.875rem',
                    marginBottom: '0.25rem'
                  }}>
-                   Personal Trainer
+                   {user?.name || 'Personal Trainer'}
                  </div>
                  
                  {/* Email */}
@@ -762,7 +791,7 @@ const PersonalDashboard: React.FC = () => {
                    fontSize: '0.75rem',
                    marginBottom: '0.75rem'
                  }}>
-                   personal@gymconnect.com
+                   {user?.email || 'personal@gymconnect.com'}
                  </div>
                  
                  {/* Botão de Perfil */}
