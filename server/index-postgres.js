@@ -10,7 +10,12 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'gymconnect-secret-key-2024';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Criar tabelas se não existirem
@@ -101,6 +106,16 @@ app.post('/api/auth/register', async (req, res) => {
     
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    }
+
+    // Verificar se o email já existe
+    const existingUser = await pool.query(
+      'SELECT id FROM personal_trainers WHERE email = $1',
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: 'Email já cadastrado' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

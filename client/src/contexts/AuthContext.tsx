@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Função para obter a URL da API baseada no ambiente
   const getApiUrl = (endpoint: string): string => {
     const baseUrl = process.env.NODE_ENV === 'development' 
-      ? '/api' 
+      ? 'http://localhost:5000/api' 
       : '/.netlify/functions/api';
     return `${baseUrl}${endpoint}`;
   };

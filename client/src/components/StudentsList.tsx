@@ -31,7 +31,7 @@ const StudentsList: React.FC = () => {
       setLoading(true);
       // Usar a API real tanto em desenvolvimento quanto em produção
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? '/api/students' 
+        ? 'http://localhost:5000/api/students' 
         : '/.netlify/functions/api/students';
       
       const response = await fetch(apiUrl, {
@@ -88,7 +88,7 @@ const StudentsList: React.FC = () => {
     try {
       // Usar a API real tanto em desenvolvimento quanto em produção
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? `/api/students/${studentToDelete.id}` 
+        ? `http://localhost:5000/api/students/${studentToDelete.id}` 
         : `/.netlify/functions/api/students/${studentToDelete.id}`;
       
       const response = await fetch(apiUrl, {

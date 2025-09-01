@@ -62,7 +62,7 @@ const NewWorkout: React.FC = () => {
   const fetchStudents = async () => {
     try {
       if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('/api/students');
+        const response = await fetch('http://localhost:5000/api/students');
         if (response.ok) {
           const data = await response.json();
           setStudents(data.students);
@@ -180,7 +180,7 @@ const NewWorkout: React.FC = () => {
 
     try {
       if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('/api/workouts', {
+        const response = await fetch('http://localhost:5000/api/workouts', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

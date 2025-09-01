@@ -38,7 +38,7 @@ const DashboardHome: React.FC = () => {
       try {
         // Usar a API real tanto em desenvolvimento quanto em produção
         const apiUrl = process.env.NODE_ENV === 'development' 
-          ? '/api/dashboard/stats' 
+          ? 'http://localhost:5000/api/dashboard/stats' 
           : '/.netlify/functions/api/dashboard/stats';
         
         const response = await fetch(apiUrl, {
