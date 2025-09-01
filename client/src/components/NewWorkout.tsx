@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Dumbbell, Save, X, Plus, Trash2 } from 'lucide-react';
+import SuccessModal from './SuccessModal';
 import './NewWorkout.css';
 
 interface Exercise {
@@ -51,7 +52,11 @@ const NewWorkout: React.FC = () => {
     exercises: []
   });
   const [students, setStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [savingExercise, setSavingExercise] = useState<number | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
   const [exerciseErrors, setExerciseErrors] = useState<{[key: number]: ExerciseErrors}>({});
 
@@ -60,16 +65,41 @@ const NewWorkout: React.FC = () => {
   }, []);
 
   const fetchStudents = async () => {
+    setLoadingStudents(true);
     try {
-      if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('http://localhost:5000/api/students');
-        if (response.ok) {
-          const data = await response.json();
-          setStudents(data.students);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('Token não encontrado');
+        setStudents([]);
+        return;
+      }
+
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5000/api/students' 
+        : '/.netlify/functions/api/students';
+      
+      console.log('Buscando alunos em:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Dados recebidos:', data);
+        setStudents(data.students || []);
+      } else {
+        console.error('Erro na resposta:', response.status, response.statusText);
+        setStudents([]);
       }
     } catch (error) {
-      // Erro ao carregar alunos
+      console.error('Erro ao carregar alunos:', error);
+      setStudents([]);
+    } finally {
+      setLoadingStudents(false);
     }
   };
 
@@ -119,6 +149,105 @@ const NewWorkout: React.FC = () => {
           [field]: undefined
         }
       }));
+    }
+  };
+
+  const saveExercise = async (exercise: Exercise) => {
+    // Validar o exercício antes de salvar
+    const exerciseError: ExerciseErrors = {};
+    
+    if (!exercise.name.trim()) {
+      exerciseError.name = 'Nome do exercício é obrigatório';
+    }
+    
+    if (exercise.sets < 1) {
+      exerciseError.sets = 'Número de séries deve ser maior que 0';
+    }
+    
+    if (exercise.reps < 1) {
+      exerciseError.reps = 'Número de repetições deve ser maior que 0';
+    }
+
+    if (Object.keys(exerciseError).length > 0) {
+      setExerciseErrors(prev => ({
+        ...prev,
+        [exercise.id]: exerciseError
+      }));
+      return;
+    }
+
+    setSavingExercise(exercise.id);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token não encontrado');
+        return;
+      }
+
+      const apiUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5000/api/exercises' 
+        : '/.netlify/functions/api/exercises';
+      
+      console.log('Salvando exercício:', exercise);
+      console.log('URL da API:', apiUrl);
+      
+      const requestBody = {
+        name: exercise.name,
+        sets: exercise.sets,
+        reps: exercise.reps,
+        weight: exercise.weight,
+        rest: exercise.rest,
+        notes: exercise.notes,
+        workoutId: formData.studentId // Usando studentId temporariamente como workoutId
+      };
+      
+      console.log('Request body:', requestBody);
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (response.ok) {
+        const savedExercise = await response.json();
+        console.log('Exercício salvo:', savedExercise);
+        
+        // Remover o exercício da lista local após salvar
+        setFormData(prev => ({
+          ...prev,
+          exercises: prev.exercises.filter(ex => ex.id !== exercise.id)
+        }));
+
+        // Limpar erros do exercício salvo
+        setExerciseErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[exercise.id];
+          return newErrors;
+        });
+
+        // Mostrar modal de sucesso
+        setSuccessMessage('Exercício salvo com sucesso!');
+        setShowSuccessModal(true);
+      } else {
+        const errorData = await response.text();
+        console.error('Erro ao salvar exercício:', response.status, errorData);
+        setSuccessMessage('Erro ao salvar exercício. Tente novamente.');
+        setShowSuccessModal(true);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar exercício:', error);
+      setSuccessMessage('Erro ao salvar exercício. Tente novamente.');
+      setShowSuccessModal(true);
+    } finally {
+      setSavingExercise(null);
     }
   };
 
@@ -329,8 +458,10 @@ const NewWorkout: React.FC = () => {
               e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
             }}
           >
-            <option value="">Selecione um aluno</option>
-            {students.map(student => (
+            <option value="">
+              {loadingStudents ? 'Carregando alunos...' : 'Selecione um aluno'}
+            </option>
+            {!loadingStudents && Array.isArray(students) && students.length > 0 && students.map(student => (
               <option key={student.id} value={student.id}>
                 {student.name} ({student.access_code})
               </option>
@@ -504,6 +635,58 @@ const NewWorkout: React.FC = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Botão Salvar Exercício */}
+                  <div style={{ 
+                    marginTop: '1rem', 
+                    display: 'flex', 
+                    justifyContent: 'flex-end' 
+                  }}>
+                    <button
+                      type="button"
+                      disabled={savingExercise === exercise.id}
+                      onClick={() => saveExercise(exercise)}
+                      className="new-workout-save-exercise-btn"
+                      style={{
+                        background: savingExercise === exercise.id
+                          ? 'rgba(59, 130, 246, 0.3)'
+                          : 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        cursor: savingExercise === exercise.id ? 'not-allowed' : 'pointer',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.3s',
+                        fontSize: '0.875rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (savingExercise !== exercise.id) {
+                          e.currentTarget.style.transform = 'scale(1.02)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (savingExercise !== exercise.id) {
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }
+                      }}
+                    >
+                      {savingExercise === exercise.id ? (
+                        <>
+                          <div className="new-workout-loading-spinner"></div>
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={14} />
+                          Salvar Exercício
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -541,10 +724,18 @@ const NewWorkout: React.FC = () => {
               </>
             )}
           </button>
-        </div>
-      </form>
-    </div>
-  );
-};
+                 </div>
+       </form>
+       
+       {/* Modal de Sucesso */}
+       <SuccessModal
+         isOpen={showSuccessModal}
+         title={successMessage.includes('sucesso') ? 'Sucesso!' : 'Atenção'}
+         message={successMessage}
+         onClose={() => setShowSuccessModal(false)}
+       />
+     </div>
+   );
+ };
 
 export default NewWorkout;

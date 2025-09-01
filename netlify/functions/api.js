@@ -669,6 +669,97 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Rota para salvar exercícios individuais (PROTEGIDA)
+    if (urlPath === '/exercises' && httpMethod === 'POST') {
+      const token = requestHeaders.authorization?.split(' ')[1];
+      const user = authenticateToken(token);
+      
+      if (!user) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Token de acesso necessário' })
+        };
+      }
+
+      try {
+        const { name, sets, reps, weight, rest, notes, workoutId } = JSON.parse(body);
+        const personalId = user.id;
+        
+        if (!name || !sets || !reps) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Nome, séries e repetições são obrigatórios' })
+          };
+        }
+
+        // Criar um novo treino se não existir, ou usar um existente
+        let workout;
+        if (workoutId) {
+          // Verificar se o treino existe e pertence ao personal
+          const workoutResult = await pool.query(
+            'SELECT * FROM workouts WHERE id = $1 AND personal_id = $2',
+            [workoutId, personalId]
+          );
+          
+          if (workoutResult.rows.length === 0) {
+            return {
+              statusCode: 404,
+              headers,
+              body: JSON.stringify({ error: 'Treino não encontrado' })
+            };
+          }
+          
+          workout = workoutResult.rows[0];
+        } else {
+          // Criar um novo treino com student_id (usando o workoutId como studentId temporariamente)
+          const workoutResult = await pool.query(
+            'INSERT INTO workouts (student_id, personal_id, name, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [workoutId, personalId, 'Treino Individual', 'Treino criado automaticamente', JSON.stringify([])]
+          );
+          workout = workoutResult.rows[0];
+        }
+
+        // Criar o exercício
+        const exercise = {
+          id: Date.now(),
+          name,
+          sets,
+          reps,
+          weight: weight || '',
+          rest: rest || '',
+          notes: notes || ''
+        };
+
+        // Adicionar o exercício ao treino
+        const currentExercises = workout.exercises ? JSON.parse(workout.exercises) : [];
+        const updatedExercises = [...currentExercises, exercise];
+
+        // Atualizar o treino com o novo exercício
+        const result = await pool.query(
+          'UPDATE workouts SET exercises = $1 WHERE id = $2 RETURNING *',
+          [JSON.stringify(updatedExercises), workout.id]
+        );
+
+        const updatedWorkout = result.rows[0];
+        updatedWorkout.exercises = JSON.parse(updatedWorkout.exercises);
+        
+        return {
+          statusCode: 201,
+          headers,
+          body: JSON.stringify(exercise)
+        };
+      } catch (error) {
+        console.error('Erro ao salvar exercício:', error);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: 'Erro interno do servidor' })
+        };
+      }
+    }
+
     // Rota para treinos de alunos (pública - sem autenticação)
     if (urlPath.startsWith('/student-workouts/') && httpMethod === 'GET') {
       try {

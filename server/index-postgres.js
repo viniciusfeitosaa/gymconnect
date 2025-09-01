@@ -263,6 +263,70 @@ app.get('/api/workouts/:studentId', authenticateToken, async (req, res) => {
   }
 });
 
+// Rota para salvar exercícios individuais
+app.post('/api/exercises', authenticateToken, async (req, res) => {
+  try {
+    const { name, sets, reps, weight, rest, notes, workoutId } = req.body;
+    const personalId = req.user.id;
+    
+    if (!name || !sets || !reps) {
+      return res.status(400).json({ error: 'Nome, séries e repetições são obrigatórios' });
+    }
+
+    // Criar um novo treino se não existir, ou usar um existente
+    let workout;
+    if (workoutId) {
+      // Verificar se o treino existe e pertence ao personal
+      const workoutResult = await pool.query(
+        'SELECT * FROM workouts WHERE id = $1 AND personal_id = $2',
+        [workoutId, personalId]
+      );
+      
+      if (workoutResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Treino não encontrado' });
+      }
+      
+      workout = workoutResult.rows[0];
+    } else {
+      // Criar um novo treino com student_id (usando o workoutId como studentId temporariamente)
+      const workoutResult = await pool.query(
+        'INSERT INTO workouts (student_id, personal_id, name, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [workoutId, personalId, 'Treino Individual', 'Treino criado automaticamente', JSON.stringify([])]
+      );
+      workout = workoutResult.rows[0];
+    }
+
+    // Criar o exercício
+    const exercise = {
+      id: Date.now(),
+      name,
+      sets,
+      reps,
+      weight: weight || '',
+      rest: rest || '',
+      notes: notes || ''
+    };
+
+    // Adicionar o exercício ao treino
+    const currentExercises = workout.exercises ? JSON.parse(workout.exercises) : [];
+    const updatedExercises = [...currentExercises, exercise];
+
+    // Atualizar o treino com o novo exercício
+    const result = await pool.query(
+      'UPDATE workouts SET exercises = $1 WHERE id = $2 RETURNING *',
+      [JSON.stringify(updatedExercises), workout.id]
+    );
+
+    const updatedWorkout = result.rows[0];
+    updatedWorkout.exercises = JSON.parse(updatedWorkout.exercises);
+    
+    res.json(exercise);
+  } catch (error) {
+    console.error('Erro ao salvar exercício:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Rota para alunos acessarem treinos (sem autenticação)
 app.post('/api/student-access', async (req, res) => {
   try {
@@ -373,14 +437,17 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 // Rota para estatísticas do dashboard (PROTEGIDA)
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
   try {
+    console.log('🔍 Dashboard stats - User:', req.user);
     const personalId = req.user.id;
     
+    console.log('🔍 Buscando alunos para personalId:', personalId);
     // Buscar alunos do personal
     const studentsResult = await pool.query(
       'SELECT * FROM students WHERE personal_id = $1',
       [personalId]
     );
     
+    console.log('🔍 Buscando treinos para personalId:', personalId);
     // Buscar treinos do personal
     const workoutsResult = await pool.query(
       'SELECT * FROM workouts WHERE personal_id = $1',
@@ -389,6 +456,9 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     
     const students = studentsResult.rows;
     const workouts = workoutsResult.rows;
+    
+    console.log('🔍 Alunos encontrados:', students.length);
+    console.log('🔍 Treinos encontrados:', workouts.length);
     
     const stats = {
       totalStudents: students.length,
@@ -404,10 +474,11 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
         : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
     };
     
+    console.log('🔍 Stats calculados:', stats);
     res.json(stats);
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('❌ Erro ao buscar estatísticas:', error);
+    res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
   }
 });
 
