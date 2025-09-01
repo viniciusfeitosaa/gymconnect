@@ -437,17 +437,14 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 // Rota para estatísticas do dashboard (PROTEGIDA)
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
   try {
-    console.log('🔍 Dashboard stats - User:', req.user);
     const personalId = req.user.id;
     
-    console.log('🔍 Buscando alunos para personalId:', personalId);
     // Buscar alunos do personal
     const studentsResult = await pool.query(
       'SELECT * FROM students WHERE personal_id = $1',
       [personalId]
     );
     
-    console.log('🔍 Buscando treinos para personalId:', personalId);
     // Buscar treinos do personal
     const workoutsResult = await pool.query(
       'SELECT * FROM workouts WHERE personal_id = $1',
@@ -456,9 +453,6 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     
     const students = studentsResult.rows;
     const workouts = workoutsResult.rows;
-    
-    console.log('🔍 Alunos encontrados:', students.length);
-    console.log('🔍 Treinos encontrados:', workouts.length);
     
     const stats = {
       totalStudents: students.length,
@@ -474,11 +468,10 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
         : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
     };
     
-    console.log('🔍 Stats calculados:', stats);
     res.json(stats);
   } catch (error) {
-    console.error('❌ Erro ao buscar estatísticas:', error);
-    res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
+    console.error('Erro ao buscar estatísticas:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
