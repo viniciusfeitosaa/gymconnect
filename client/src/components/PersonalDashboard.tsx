@@ -9,6 +9,7 @@ import NewStudent from './NewStudent';
 import NewWorkout from './NewWorkout';
 import PersonalProfile from './PersonalProfile';
 import './PersonalDashboard.css';
+import { getApiUrl } from '../utils/api';
 
 // Componente da página inicial do dashboard
 interface Student {
@@ -36,12 +37,7 @@ const DashboardHome: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Usar a API real tanto em desenvolvimento quanto em produção
-        const apiUrl = process.env.NODE_ENV === 'development' 
-          ? 'http://localhost:5000/api/dashboard/stats' 
-          : '/.netlify/functions/api/dashboard/stats';
-        
-        const response = await fetch(apiUrl, {
+        const response = await fetch(getApiUrl('/dashboard/stats'), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
@@ -505,11 +501,7 @@ const PersonalDashboard: React.FC = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const apiUrl = process.env.NODE_ENV === 'development' 
-          ? 'http://localhost:5000/api/auth/me' 
-          : '/.netlify/functions/api/auth/me';
-        
-        const response = await fetch(apiUrl, {
+        const response = await fetch(getApiUrl('/auth/me'), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

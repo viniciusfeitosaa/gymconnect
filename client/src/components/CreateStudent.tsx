@@ -27,7 +27,7 @@ const CreateStudent: React.FC = () => {
 
     try {
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/students' 
+        ? getApiUrl('/students') 
         : '/.netlify/functions/api/students';
         
       const response = await fetch(apiUrl, {

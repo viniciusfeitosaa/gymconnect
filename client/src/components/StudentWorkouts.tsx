@@ -33,7 +33,7 @@ const StudentWorkouts: React.FC = () => {
       try {
         // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
         if (process.env.NODE_ENV === 'development') {
-          const response = await fetch(`http://localhost:5000/api/student-workouts/${accessCode}`);
+          const response = await fetch(getApiUrl('/student-workouts/${accessCode}'));
           if (response.ok) {
             const data = await response.json();
             setWorkouts(data.workouts);

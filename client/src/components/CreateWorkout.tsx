@@ -33,7 +33,7 @@ const CreateWorkout: React.FC = () => {
   const fetchStudent = useCallback(async () => {
     try {
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/students' 
+        ? getApiUrl('/students') 
         : '/.netlify/functions/api/students';
         
       const response = await fetch(apiUrl, {
@@ -118,7 +118,7 @@ const CreateWorkout: React.FC = () => {
       };
 
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? `http://localhost:5000/api/students/${studentId}/workouts` 
+        ? getApiUrl('/students/${studentId}/workouts') 
         : `/.netlify/functions/api/students/${studentId}/workouts`;
         
       const response = await fetch(apiUrl, {

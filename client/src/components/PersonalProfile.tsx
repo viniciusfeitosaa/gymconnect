@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Camera } from 'lucide-react';
 import './PersonalProfile.css';
+import { getApiUrl } from '../utils/api';
 
 interface PersonalProfile {
   id: string;
@@ -47,7 +48,7 @@ const PersonalProfile: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/me', {
+      const response = await fetch(getApiUrl('/auth/me'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

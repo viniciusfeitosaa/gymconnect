@@ -44,7 +44,7 @@ const NewStudent: React.FC = () => {
     try {
       // Usar a API real tanto em desenvolvimento quanto em produção
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/students' 
+        ? getApiUrl('/students') 
         : '/.netlify/functions/api/students';
       
       const response = await fetch(apiUrl, {

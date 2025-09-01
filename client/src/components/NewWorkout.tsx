@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Dumbbell, Save, X, Plus, Trash2 } from 'lucide-react';
 import SuccessModal from './SuccessModal';
 import './NewWorkout.css';
+import { getApiUrl } from '../utils/api';
 
 interface Exercise {
   id: number;
@@ -74,13 +75,9 @@ const NewWorkout: React.FC = () => {
         return;
       }
 
-      const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/students' 
-        : '/.netlify/functions/api/students';
+      console.log('Buscando alunos em:', getApiUrl('/students'));
       
-      console.log('Buscando alunos em:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
+      const response = await fetch(getApiUrl('/students'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -185,12 +182,8 @@ const NewWorkout: React.FC = () => {
         return;
       }
 
-      const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/exercises' 
-        : '/.netlify/functions/api/exercises';
-      
       console.log('Salvando exercício:', exercise);
-      console.log('URL da API:', apiUrl);
+      console.log('URL da API:', getApiUrl('/exercises'));
       
       const requestBody = {
         name: exercise.name,
@@ -204,7 +197,7 @@ const NewWorkout: React.FC = () => {
       
       console.log('Request body:', requestBody);
       
-      const response = await fetch(apiUrl, {
+      const response = await fetch(getApiUrl('/exercises'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -309,7 +302,7 @@ const NewWorkout: React.FC = () => {
 
     try {
       if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('http://localhost:5000/api/workouts', {
+        const response = await fetch(getApiUrl('/workouts'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

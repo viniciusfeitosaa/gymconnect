@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getApiUrl } from '../utils/api';
 
 interface User {
   id: string;
@@ -32,13 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para obter a URL da API baseada no ambiente
-  const getApiUrl = (endpoint: string): string => {
-    const baseUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api' 
-      : '/.netlify/functions/api';
-    return `${baseUrl}${endpoint}`;
-  };
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');

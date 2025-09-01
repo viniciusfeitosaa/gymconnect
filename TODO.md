@@ -35,6 +35,9 @@
 - [x] Verify database structure is correct and all tables have proper schema
 - [x] Create manifest.json file to fix 404 error
 - [x] Fix CORS configuration for production domain
+- [x] Create centralized API URL management utility
+- [x] Update all frontend components to use dynamic API URLs instead of hardcoded localhost
+- [x] Fix frontend trying to access localhost:5000 from production domain
 
 ## Pending Tasks 📋
 
@@ -44,3 +47,4 @@
 - [ ] Test dashboard stats with corrected database structure
 - [ ] Test creating new students in both local and production environments
 - [ ] Deploy updated CORS configuration to production
+- [ ] Test frontend in production environment with corrected API URLs
