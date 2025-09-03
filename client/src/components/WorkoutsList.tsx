@@ -74,7 +74,7 @@ const WorkoutsList: React.FC = () => {
       try {
         // Usar a API real tanto em desenvolvimento quanto em produção
         const apiUrl = process.env.NODE_ENV === 'development' 
-          ? getApiUrl('/workouts/${workoutId}') 
+          ? getApiUrl(`/workouts/${workoutId}`) 
           : `/.netlify/functions/api/workouts/${workoutId}`;
         
         const response = await fetch(apiUrl, { 

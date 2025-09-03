@@ -89,7 +89,7 @@ const StudentsList: React.FC = () => {
     try {
       // Usar a API real tanto em desenvolvimento quanto em produção
       const apiUrl = process.env.NODE_ENV === 'development' 
-        ? getApiUrl('/students/${studentToDelete.id}') 
+        ? getApiUrl(`/students/${studentToDelete.id}`) 
         : `/.netlify/functions/api/students/${studentToDelete.id}`;
       
       const response = await fetch(apiUrl, {
