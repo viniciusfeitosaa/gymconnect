@@ -60,6 +60,7 @@ const NewWorkout: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
   const [exerciseErrors, setExerciseErrors] = useState<{[key: number]: ExerciseErrors}>({});
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
     fetchStudents();
@@ -212,6 +213,17 @@ const NewWorkout: React.FC = () => {
       if (response.ok) {
         const savedExercise = await response.json();
         console.log('Exercício salvo:', savedExercise);
+        
+        // Adicionar o exercício salvo à lista de exercícios salvos
+        setSavedExercises(prev => [...prev, {
+          id: savedExercise.id,
+          name: savedExercise.name,
+          sets: savedExercise.sets,
+          reps: savedExercise.reps,
+          weight: savedExercise.weight,
+          rest: savedExercise.rest,
+          notes: savedExercise.notes
+        }]);
         
         // Remover o exercício da lista local após salvar
         setFormData(prev => ({
@@ -491,7 +503,7 @@ const NewWorkout: React.FC = () => {
             </div>
           )}
 
-          {formData.exercises.length === 0 ? (
+          {formData.exercises.length === 0 && savedExercises.length === 0 ? (
             <div className="new-workout-empty-exercises">
               <Dumbbell size={32} style={{ marginBottom: '0.5rem' }} />
               <p>Nenhum exercício adicionado</p>
@@ -499,6 +511,60 @@ const NewWorkout: React.FC = () => {
             </div>
           ) : (
             <div className="new-workout-exercises-list">
+              {/* Mostrar exercícios salvos */}
+              {savedExercises.map((exercise, index) => (
+                <div key={`saved-${exercise.id}`} className="new-workout-exercise-item saved">
+                  <div className="new-workout-exercise-header">
+                    <h4>Exercício {index + 1} - {exercise.name}</h4>
+                    <div className="new-workout-exercise-badge">
+                      <span style={{ 
+                        background: 'linear-gradient(135deg, #10b981, #059669)', 
+                        color: 'white',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '500'
+                      }}>
+                        Salvo
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSavedExercises(prev => prev.filter(ex => ex.id !== exercise.id))}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#ef4444',
+                          cursor: 'pointer',
+                          padding: '0.25rem',
+                          marginLeft: '0.5rem',
+                          borderRadius: '0.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Remover exercício"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="new-workout-exercise-details">
+                    <div className="new-workout-exercise-info">
+                      <span><strong>Séries:</strong> {exercise.sets}</span>
+                      <span><strong>Repetições:</strong> {exercise.reps}</span>
+                      {exercise.weight && <span><strong>Peso:</strong> {exercise.weight}</span>}
+                      {exercise.rest && <span><strong>Descanso:</strong> {exercise.rest}</span>}
+                    </div>
+                    {exercise.notes && (
+                      <div className="new-workout-exercise-notes">
+                        <strong>Observações:</strong> {exercise.notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {/* Mostrar exercícios em edição */}
               {formData.exercises.map((exercise, index) => (
                 <div
                   key={exercise.id}
