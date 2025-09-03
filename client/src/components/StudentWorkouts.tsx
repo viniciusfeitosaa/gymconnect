@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Dumbbell, Clock, Target, TrendingUp, Calendar, User } from 'lucide-react';
 import './StudentWorkouts.css';
+import { getApiUrl } from '../utils/api';
 
 interface Exercise {
   id: number;

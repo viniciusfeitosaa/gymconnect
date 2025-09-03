@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Target, Save, X } from 'lucide-react';
 import './NewStudent.css';
 import SuccessModal from './SuccessModal';
+import { getApiUrl } from '../utils/api';
 
 interface NewStudentForm {
   name: string;

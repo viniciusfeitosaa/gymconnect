@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
+import { getApiUrl } from '../utils/api';
 
 const CreateStudent: React.FC = () => {
   const [formData, setFormData] = useState({

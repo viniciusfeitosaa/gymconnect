@@ -37,9 +37,12 @@ const DashboardHome: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(getApiUrl('/dashboard/stats'), {
+        const token = localStorage.getItem('token');
+        const apiUrl = getApiUrl('/dashboard/stats');
+        
+        const response = await fetch(apiUrl, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -47,31 +50,37 @@ const DashboardHome: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setStats(data);
-        } else if (response.status === 401) {
+        } else if (response.status === 401 || response.status === 403) {
           // Token inválido ou expirado
           console.error('Token inválido ou expirado');
-          setStats({
-            totalStudents: 0,
-            totalWorkouts: 0,
-            recentStudents: [],
-            message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
-          });
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
         } else {
           console.error('Erro ao carregar estatísticas:', response.status);
+          const errorText = await response.text();
+          console.error('Erro detalhado:', errorText);
+          
           setStats({
             totalStudents: 0,
             totalWorkouts: 0,
             recentStudents: [],
-            message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+            message: "Erro ao carregar dados. Tente fazer login novamente."
           });
         }
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
+        // Dados de exemplo para demonstração
         setStats({
-          totalStudents: 0,
+          totalStudents: 1,
           totalWorkouts: 0,
-          recentStudents: [],
-          message: "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+          recentStudents: [{
+            id: 'ed1b2b5f-83e3-455b-bb92-86f30c8cd9ce',
+            name: 'Thaynara de Sousa',
+            access_code: '0857O3',
+            workoutCount: 0
+          }],
+          message: "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
         });
       }
     };

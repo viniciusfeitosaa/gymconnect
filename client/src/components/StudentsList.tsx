@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Copy, Check, Users, Search, ArrowLeft, Calendar, Target, Trash2 } from 'lucide-react';
 import './StudentsList.css';
+import { getApiUrl } from '../utils/api';
 
 interface Student {
   id: string;

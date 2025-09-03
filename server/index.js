@@ -325,45 +325,63 @@ app.get('/api/health', (req, res) => {
 
 // Rota para estatísticas do dashboard (PROTEGIDA)
 app.get('/api/dashboard/stats', authenticateToken, (req, res) => {
-  const personalId = req.user.id;
+  console.log('=== DASHBOARD STATS REQUEST ===');
+  console.log('User:', req.user);
   
-  // Buscar alunos do personal
-  db.all(
-    'SELECT * FROM students WHERE personal_id = ?',
-    [personalId],
-    (err, students) => {
-      if (err) {
-        return res.status(500).json({ error: 'Erro ao buscar alunos' });
-      }
-      
-      // Buscar treinos do personal
-      db.all(
-        'SELECT * FROM workouts WHERE personal_id = ?',
-        [personalId],
-        (err, workouts) => {
-          if (err) {
-            return res.status(500).json({ error: 'Erro ao buscar treinos' });
-          }
-          
-          const stats = {
-            totalStudents: students.length,
-            totalWorkouts: workouts.length,
-            recentStudents: students.slice(0, 3).map(student => ({
-              id: student.id,
-              name: student.name,
-              access_code: student.access_code,
-              workoutCount: workouts.filter(w => w.student_id === student.id).length
-            })),
-            message: students.length === 0 
-              ? "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
-              : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
-          };
-          
-          res.json(stats);
+  try {
+    const personalId = req.user.id;
+    console.log('Personal ID:', personalId);
+    
+    // Buscar alunos do personal
+    console.log('Buscando alunos...');
+    db.all(
+      'SELECT * FROM students WHERE personal_id = ?',
+      [personalId],
+      (err, students) => {
+        if (err) {
+          console.error('Erro ao buscar alunos:', err);
+          return res.status(500).json({ error: 'Erro ao buscar alunos', details: err.message });
         }
-      );
-    }
-  );
+        
+        console.log('Alunos encontrados:', students.length);
+        
+        // Buscar treinos do personal
+        console.log('Buscando treinos...');
+        db.all(
+          'SELECT * FROM workouts WHERE personal_id = ?',
+          [personalId],
+          (err, workouts) => {
+            if (err) {
+              console.error('Erro ao buscar treinos:', err);
+              return res.status(500).json({ error: 'Erro ao buscar treinos', details: err.message });
+            }
+            
+            console.log('Treinos encontrados:', workouts.length);
+            
+            const stats = {
+              totalStudents: students.length,
+              totalWorkouts: workouts.length,
+              recentStudents: students.slice(0, 3).map(student => ({
+                id: student.id,
+                name: student.name,
+                access_code: student.access_code,
+                workoutCount: workouts.filter(w => w.student_id === student.id).length
+              })),
+              message: students.length === 0 
+                ? "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+                : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
+            };
+            
+            console.log('Stats calculadas:', stats);
+            res.json(stats);
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error('Erro geral no dashboard stats:', error);
+    res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
+  }
 });
 
 // Rota para listar todos os treinos (PROTEGIDA)
