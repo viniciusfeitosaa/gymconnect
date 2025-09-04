@@ -505,6 +505,7 @@ const PersonalDashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  // Removido: estados de scroll para comportamento fixo
 
   const handleLogout = () => {
     logout();
@@ -518,6 +519,8 @@ const PersonalDashboard: React.FC = () => {
   const closeSidebar = () => {
     setSidebarOpen(false);
   };
+
+  // Removido: função scrollToTop para comportamento fixo
 
   // Buscar dados do usuário
   useEffect(() => {
@@ -560,18 +563,22 @@ const PersonalDashboard: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [sidebarOpen]);
 
+  // Removido: listener de scroll para comportamento fixo
+
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #020617 0%, #0c1421 25%, #1e293b 50%, #0c1421 75%, #020617 100%)',
       color: 'white'
     }}>
-      {/* Header */}
+      {/* Header - Comportamento fixo, sem acompanhar scroll */}
       <header style={{
         backgroundColor: 'rgba(2, 6, 23, 0.95)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
-        padding: '1rem clamp(1rem, 4vw, 2rem)'
+        padding: '1rem clamp(1rem, 4vw, 2rem)',
+        position: 'relative',
+        zIndex: 1001
       }}>
         <div style={{
           display: 'flex',
@@ -887,6 +894,8 @@ const PersonalDashboard: React.FC = () => {
            </Routes>
         </main>
       </div>
+
+      {/* Removido: Botão Voltar ao Topo para comportamento fixo */}
     </div>
   );
 };
