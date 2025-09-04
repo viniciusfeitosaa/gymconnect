@@ -515,6 +515,10 @@ const PersonalDashboard: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   // Buscar dados do usuário
   useEffect(() => {
     const fetchUserData = async () => {
@@ -687,6 +691,7 @@ const PersonalDashboard: React.FC = () => {
              }}>
                <Link
                  to="/dashboard"
+                 onClick={closeSidebar}
                  style={{
                    display: 'flex',
                    alignItems: 'center',
@@ -712,6 +717,7 @@ const PersonalDashboard: React.FC = () => {
                
                <Link
                  to="/dashboard/students"
+                 onClick={closeSidebar}
                  style={{
                    display: 'flex',
                    alignItems: 'center',
@@ -737,6 +743,7 @@ const PersonalDashboard: React.FC = () => {
                
                <Link
                  to="/dashboard/workouts"
+                 onClick={closeSidebar}
                  style={{
                    display: 'flex',
                    alignItems: 'center',
@@ -810,6 +817,7 @@ const PersonalDashboard: React.FC = () => {
                  {/* Botão de Perfil */}
                  <Link
                    to="/dashboard/profile"
+                   onClick={closeSidebar}
                    style={{
                      display: 'inline-flex',
                      alignItems: 'center',
