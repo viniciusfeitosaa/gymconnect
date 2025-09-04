@@ -76,6 +76,14 @@ async function createTables() {
     `).catch(() => {
       // Ignorar erro se a coluna já for UUID
     });
+    
+    // Tentar alterar workout_id na tabela exercises para UUID
+    await pool.query(`
+      ALTER TABLE exercises 
+      ALTER COLUMN workout_id TYPE UUID USING workout_id::uuid
+    `).catch(() => {
+      // Ignorar erro se já for UUID ou se não conseguir converter
+    });
 
     // Tabela de exercícios
     await pool.query(`

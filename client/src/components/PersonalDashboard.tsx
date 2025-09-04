@@ -703,7 +703,8 @@ const PersonalDashboard: React.FC = () => {
              width: '280px',
              height: '100%',
              display: 'flex',
-             flexDirection: 'column'
+             flexDirection: 'column',
+             overflowY: 'auto'
            }}>
              {/* Navegação */}
              <nav style={{

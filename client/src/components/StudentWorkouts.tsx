@@ -196,30 +196,26 @@ const StudentWorkouts: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          // Buscar treinos
-          const workoutsResponse = await fetch(getApiUrl(`/student-workouts/${accessCode}`));
-          if (workoutsResponse.ok) {
-            const workoutsData = await workoutsResponse.json();
-            setWorkouts(workoutsData.workouts);
-            setStudentName(workoutsData.studentName);
-          } else {
-            // Fallback para dados estáticos
-            loadStaticWorkouts();
-          }
-          
-          // Buscar informações do personal trainer
-          const trainerResponse = await fetch(getApiUrl(`/student-trainer-info/${accessCode}`));
-          if (trainerResponse.ok) {
-            const trainerData = await trainerResponse.json();
-            setTrainerInfo(trainerData);
-          }
+        // Usar API real tanto em desenvolvimento quanto em produção
+        // Buscar treinos
+        const workoutsResponse = await fetch(getApiUrl(`/student-workouts/${accessCode}`));
+        if (workoutsResponse.ok) {
+          const workoutsData = await workoutsResponse.json();
+          setWorkouts(workoutsData.workouts);
+          setStudentName(workoutsData.studentName);
         } else {
-          // Em produção, usar dados estáticos
+          // Fallback para dados estáticos
           loadStaticWorkouts();
         }
+        
+        // Buscar informações do personal trainer
+        const trainerResponse = await fetch(getApiUrl(`/student-trainer-info/${accessCode}`));
+        if (trainerResponse.ok) {
+          const trainerData = await trainerResponse.json();
+          setTrainerInfo(trainerData);
+        }
       } catch (error) {
+        console.error('Erro ao buscar dados:', error);
         // Fallback para dados estáticos
         loadStaticWorkouts();
       } finally {
