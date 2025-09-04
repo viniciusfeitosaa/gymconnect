@@ -520,6 +520,22 @@ const PersonalDashboard: React.FC = () => {
     setSidebarOpen(false);
   };
 
+  // Controlar scroll da página baseado no estado do sidebar
+  useEffect(() => {
+    if (sidebarOpen && isMobile) {
+      // Desabilitar scroll quando sidebar está aberto
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Reabilitar scroll quando sidebar está fechado
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup: sempre reabilitar scroll quando componente desmontar
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [sidebarOpen, isMobile]);
+
   // Removido: função scrollToTop para comportamento fixo
 
   // Buscar dados do usuário
