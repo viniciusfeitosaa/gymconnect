@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dumbbell, Clock, Target, TrendingUp, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Dumbbell, Clock, Target, TrendingUp, Calendar, User, MessageCircle } from 'lucide-react';
 import './StudentWorkouts.css';
 import { getApiUrl } from '../utils/api';
+import SuccessModal from './SuccessModal';
 
 interface Exercise {
   id: number;
@@ -28,33 +29,17 @@ const StudentWorkouts: React.FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState('');
+  const [trainerInfo, setTrainerInfo] = useState<{
+    trainerName: string;
+    trainerEmail: string;
+    trainerPhone: string | null;
+  } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalType, setModalType] = useState<'success' | 'error'>('error');
 
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      try {
-        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
-        if (process.env.NODE_ENV === 'development') {
-          const response = await fetch(getApiUrl(`/student-workouts/${accessCode}`));
-          if (response.ok) {
-            const data = await response.json();
-            setWorkouts(data.workouts);
-            setStudentName(data.studentName);
-          } else {
-            // Fallback para dados estáticos
-            loadStaticWorkouts();
-          }
-        } else {
-          // Em produção, usar dados estáticos
-          loadStaticWorkouts();
-        }
-      } catch (error) {
-        // Fallback para dados estáticos
-        loadStaticWorkouts();
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const loadStaticWorkouts = () => {
       // Mapear códigos de acesso para nomes reais
       const studentNames: { [key: string]: string } = {
@@ -209,8 +194,64 @@ const StudentWorkouts: React.FC = () => {
       setWorkouts(testWorkouts);
     };
 
-    fetchWorkouts();
+    const fetchData = async () => {
+      try {
+        // Em desenvolvimento, usar backend local; em produção, usar dados estáticos
+        if (process.env.NODE_ENV === 'development') {
+          // Buscar treinos
+          const workoutsResponse = await fetch(getApiUrl(`/student-workouts/${accessCode}`));
+          if (workoutsResponse.ok) {
+            const workoutsData = await workoutsResponse.json();
+            setWorkouts(workoutsData.workouts);
+            setStudentName(workoutsData.studentName);
+          } else {
+            // Fallback para dados estáticos
+            loadStaticWorkouts();
+          }
+          
+          // Buscar informações do personal trainer
+          const trainerResponse = await fetch(getApiUrl(`/student-trainer-info/${accessCode}`));
+          if (trainerResponse.ok) {
+            const trainerData = await trainerResponse.json();
+            setTrainerInfo(trainerData);
+          }
+        } else {
+          // Em produção, usar dados estáticos
+          loadStaticWorkouts();
+        }
+      } catch (error) {
+        // Fallback para dados estáticos
+        loadStaticWorkouts();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [accessCode]);
+
+  const handleWhatsAppClick = () => {
+    if (!trainerInfo?.trainerPhone) {
+      setModalTitle('Telefone não cadastrado');
+      setModalMessage('Telefone do personal trainer não foi adicionado ainda.');
+      setModalType('error');
+      setShowModal(true);
+      return;
+    }
+    
+    // Limpar o número de telefone (remover caracteres especiais)
+    const cleanPhone = trainerInfo.trainerPhone.replace(/\D/g, '');
+    
+    // Adicionar código do país se não tiver (assumindo Brasil +55)
+    const phoneWithCountryCode = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+    
+    // Mensagem padrão
+    const message = `Olá! Sou o(a) aluno(a) ${studentName} e gostaria de entrar em contato sobre meus treinos.`;
+    
+    // Abrir WhatsApp
+    const whatsappUrl = `https://wa.me/${phoneWithCountryCode}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   if (loading) {
     return (
@@ -256,9 +297,19 @@ const StudentWorkouts: React.FC = () => {
 
       {/* Workouts List */}
       <div className="student-workouts-content">
-        <h2 className="student-workouts-section-title">
-          Seus Treinos
-        </h2>
+        <div className="student-workouts-section-header">
+          <h2 className="student-workouts-section-title">
+            Seus Treinos
+          </h2>
+          <button
+            onClick={handleWhatsAppClick}
+            className="student-workouts-whatsapp-btn"
+            title={trainerInfo?.trainerPhone ? `Falar com ${trainerInfo.trainerName} no WhatsApp` : 'Telefone não cadastrado'}
+          >
+            <MessageCircle size={20} />
+            WhatsApp
+          </button>
+        </div>
 
         <div className="student-workouts-grid">
           {workouts.map((workout) => (
@@ -355,6 +406,15 @@ const StudentWorkouts: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal para mensagens */}
+      <SuccessModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={modalTitle}
+        message={modalMessage}
+        type={modalType}
+      />
     </div>
   );
 };

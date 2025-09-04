@@ -58,9 +58,11 @@ const NewWorkout: React.FC = () => {
   const [savingExercise, setSavingExercise] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [modalType, setModalType] = useState<'success' | 'error'>('success');
   const [errors, setErrors] = useState<FormErrors>({});
   const [exerciseErrors, setExerciseErrors] = useState<{[key: number]: ExerciseErrors}>({});
   const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     fetchStudents();
@@ -130,6 +132,20 @@ const NewWorkout: React.FC = () => {
     });
   };
 
+  const handleEditExercise = (exercise: Exercise) => {
+    // Remove o exercício da lista de salvos
+    setSavedExercises(prev => prev.filter(ex => ex.id !== exercise.id));
+    
+    // Adiciona o exercício de volta ao formulário para edição
+    setFormData(prev => ({
+      ...prev,
+      exercises: [...prev.exercises, exercise]
+    }));
+    
+    // Define como exercício sendo editado
+    setEditingExercise(exercise);
+  };
+
   const updateExercise = (exerciseId: number, field: keyof Exercise, value: string | number) => {
     setFormData(prev => ({
       ...prev,
@@ -177,79 +193,47 @@ const NewWorkout: React.FC = () => {
     setSavingExercise(exercise.id);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('Token não encontrado');
-        return;
-      }
-
-      console.log('Salvando exercício:', exercise);
-      console.log('URL da API:', getApiUrl('/exercises'));
-      
-      const requestBody = {
+      // Em vez de salvar no backend, apenas mover para a lista de exercícios salvos
+      // Isso evita criar treinos automáticos
+      const savedExercise = {
+        id: exercise.id,
         name: exercise.name,
         sets: exercise.sets,
         reps: exercise.reps,
         weight: exercise.weight,
         rest: exercise.rest,
-        notes: exercise.notes,
-        workoutId: formData.studentId // Usando studentId temporariamente como workoutId
+        notes: exercise.notes
       };
       
-      console.log('Request body:', requestBody);
+      // Adicionar o exercício à lista de exercícios salvos
+      setSavedExercises(prev => [...prev, savedExercise]);
       
-      const response = await fetch(getApiUrl('/exercises'), {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
+      // Remover o exercício da lista local após salvar
+      setFormData(prev => ({
+        ...prev,
+        exercises: prev.exercises.filter(ex => ex.id !== exercise.id)
+      }));
+
+      // Limpar o estado de edição se este era o exercício sendo editado
+      if (editingExercise && editingExercise.id === exercise.id) {
+        setEditingExercise(null);
+      }
+
+      // Limpar erros do exercício salvo
+      setExerciseErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[exercise.id];
+        return newErrors;
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
-      if (response.ok) {
-        const savedExercise = await response.json();
-        console.log('Exercício salvo:', savedExercise);
-        
-        // Adicionar o exercício salvo à lista de exercícios salvos
-        setSavedExercises(prev => [...prev, {
-          id: savedExercise.id,
-          name: savedExercise.name,
-          sets: savedExercise.sets,
-          reps: savedExercise.reps,
-          weight: savedExercise.weight,
-          rest: savedExercise.rest,
-          notes: savedExercise.notes
-        }]);
-        
-        // Remover o exercício da lista local após salvar
-        setFormData(prev => ({
-          ...prev,
-          exercises: prev.exercises.filter(ex => ex.id !== exercise.id)
-        }));
-
-        // Limpar erros do exercício salvo
-        setExerciseErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors[exercise.id];
-          return newErrors;
-        });
-
-        // Mostrar modal de sucesso
-        setSuccessMessage('Exercício salvo com sucesso!');
-        setShowSuccessModal(true);
-      } else {
-        const errorData = await response.text();
-        console.error('Erro ao salvar exercício:', response.status, errorData);
-        setSuccessMessage('Erro ao salvar exercício. Tente novamente.');
-        setShowSuccessModal(true);
-      }
+      // Mostrar modal de sucesso
+      setSuccessMessage('Exercício adicionado ao treino!');
+      setModalType('success');
+      setShowSuccessModal(true);
     } catch (error) {
-      console.error('Erro ao salvar exercício:', error);
-      setSuccessMessage('Erro ao salvar exercício. Tente novamente.');
+      console.error('Erro ao processar exercício:', error);
+      setSuccessMessage('Erro ao processar exercício. Tente novamente.');
+      setModalType('error');
       setShowSuccessModal(true);
     } finally {
       setSavingExercise(null);
@@ -272,7 +256,7 @@ const NewWorkout: React.FC = () => {
       newErrors.studentId = 'Selecione um aluno';
     }
 
-    if (formData.exercises.length === 0) {
+    if (formData.exercises.length === 0 && savedExercises.length === 0) {
       newErrors.exercises = 'Adicione pelo menos um exercício';
     }
 
@@ -314,30 +298,77 @@ const NewWorkout: React.FC = () => {
 
     try {
       if (process.env.NODE_ENV === 'development') {
+        // Combinar exercícios em edição com exercícios salvos
+        const allExercises = [...formData.exercises, ...savedExercises];
+        
+        const requestBody = {
+          studentId: formData.studentId,
+          name: formData.name,
+          description: formData.description,
+          exercises: allExercises,
+          created_at: new Date().toISOString()
+        };
+        
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setSuccessMessage('Você precisa estar logado para criar um treino');
+          setModalType('error');
+          setShowSuccessModal(true);
+          // Redirecionar após 2 segundos
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+          return;
+        }
+        
         const response = await fetch(getApiUrl('/workouts'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            ...formData,
-            created_at: new Date().toISOString()
-          }),
+          body: JSON.stringify(requestBody),
         });
 
         if (response.ok) {
-          alert('Treino criado com sucesso!');
-          navigate('/dashboard/workouts');
+          const result = await response.json();
+          setSuccessMessage('Treino criado com sucesso!');
+          setModalType('success');
+          setShowSuccessModal(true);
+          // Redirecionar após 2 segundos
+          setTimeout(() => {
+            navigate('/dashboard/workouts');
+          }, 2000);
+        } else if (response.status === 401 || response.status === 403) {
+          // Token inválido ou expirado
+          localStorage.removeItem('token');
+          setSuccessMessage('Sua sessão expirou. Faça login novamente.');
+          setModalType('error');
+          setShowSuccessModal(true);
+          // Redirecionar após 2 segundos
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
         } else {
           const errorData = await response.json();
-          alert(errorData.error || 'Erro ao criar treino');
+          setSuccessMessage(errorData.error || 'Erro ao criar treino');
+          setModalType('error');
+          setShowSuccessModal(true);
         }
       } else {
-        alert('Treino criado com sucesso!');
-        navigate('/dashboard/workouts');
+        setSuccessMessage('Treino criado com sucesso!');
+        setModalType('success');
+        setShowSuccessModal(true);
+        // Redirecionar após 2 segundos
+        setTimeout(() => {
+          navigate('/dashboard/workouts');
+        }, 2000);
       }
     } catch (error) {
-      alert('Erro ao criar treino');
+      setSuccessMessage('Erro ao criar treino');
+      setModalType('error');
+      setShowSuccessModal(true);
     } finally {
       setLoading(false);
     }
@@ -516,37 +547,6 @@ const NewWorkout: React.FC = () => {
                 <div key={`saved-${exercise.id}`} className="new-workout-exercise-item saved">
                   <div className="new-workout-exercise-header">
                     <h4>Exercício {index + 1} - {exercise.name}</h4>
-                    <div className="new-workout-exercise-badge">
-                      <span style={{ 
-                        background: 'linear-gradient(135deg, #10b981, #059669)', 
-                        color: 'white',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '0.25rem',
-                        fontSize: '0.75rem',
-                        fontWeight: '500'
-                      }}>
-                        Salvo
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setSavedExercises(prev => prev.filter(ex => ex.id !== exercise.id))}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#ef4444',
-                          cursor: 'pointer',
-                          padding: '0.25rem',
-                          marginLeft: '0.5rem',
-                          borderRadius: '0.25rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        title="Remover exercício"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
                   </div>
                   <div className="new-workout-exercise-details">
                     <div className="new-workout-exercise-info">
@@ -560,6 +560,33 @@ const NewWorkout: React.FC = () => {
                         <strong>Observações:</strong> {exercise.notes}
                       </div>
                     )}
+                    <div className="new-workout-exercise-actions">
+                      <button
+                        type="button"
+                        className="new-workout-exercise-action-btn edit"
+                        onClick={() => handleEditExercise(exercise)}
+                        title="Editar exercício"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="new-workout-exercise-action-btn delete"
+                        onClick={() => setSavedExercises(prev => prev.filter(ex => ex.id !== exercise.id))}
+                        title="Excluir exercício"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                        Excluir
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -568,16 +595,23 @@ const NewWorkout: React.FC = () => {
               {formData.exercises.map((exercise, index) => (
                 <div
                   key={exercise.id}
-                  className="new-workout-exercise-card"
+                  className={`new-workout-exercise-card ${editingExercise && editingExercise.id === exercise.id ? 'editing' : ''}`}
                 >
                   {/* Header do exercício */}
                   <div className="new-workout-exercise-header">
                     <h4 className="new-workout-exercise-title">
+                      {editingExercise && editingExercise.id === exercise.id ? '✏️ Editando: ' : ''}
                       Exercício {index + 1}
                     </h4>
                     <button
                       type="button"
-                      onClick={() => removeExercise(exercise.id)}
+                      onClick={() => {
+                        removeExercise(exercise.id);
+                        // Se estava editando este exercício, limpar o estado de edição
+                        if (editingExercise && editingExercise.id === exercise.id) {
+                          setEditingExercise(null);
+                        }
+                      }}
                       className="new-workout-remove-exercise-btn"
                     >
                       <Trash2 size={14} />
@@ -789,9 +823,10 @@ const NewWorkout: React.FC = () => {
        {/* Modal de Sucesso */}
        <SuccessModal
          isOpen={showSuccessModal}
-         title={successMessage.includes('sucesso') ? 'Sucesso!' : 'Atenção'}
+         title={modalType === 'success' ? 'Sucesso!' : 'Atenção'}
          message={successMessage}
          onClose={() => setShowSuccessModal(false)}
+         type={modalType}
        />
      </div>
    );

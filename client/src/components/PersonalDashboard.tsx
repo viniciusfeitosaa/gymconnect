@@ -8,6 +8,9 @@ import WorkoutsList from './WorkoutsList';
 import NewStudent from './NewStudent';
 import NewWorkout from './NewWorkout';
 import PersonalProfile from './PersonalProfile';
+import StudentSpecificWorkouts from './StudentSpecificWorkouts';
+import StudentSpecificNewWorkout from './StudentSpecificNewWorkout';
+import WorkoutDetails from './WorkoutDetails';
 import './PersonalDashboard.css';
 import { getApiUrl } from '../utils/api';
 
@@ -867,7 +870,10 @@ const PersonalDashboard: React.FC = () => {
              <Route path="/" element={<DashboardHome />} />
              <Route path="/students" element={<StudentsList />} />
              <Route path="/students/new" element={<NewStudent />} />
+             <Route path="/students/:studentId/workouts" element={<StudentSpecificWorkouts />} />
+             <Route path="/students/:studentId/workouts/create" element={<StudentSpecificNewWorkout />} />
              <Route path="/workouts" element={<WorkoutsList />} />
+             <Route path="/workouts/:workoutId" element={<WorkoutDetails />} />
              <Route path="/workouts/new" element={<NewWorkout />} />
              <Route path="/profile" element={<PersonalProfile />} />
            </Routes>

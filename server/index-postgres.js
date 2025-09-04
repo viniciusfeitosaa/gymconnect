@@ -33,8 +33,15 @@ async function createTables() {
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password TEXT NOT NULL,
+        phone VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+    
+    // Adicionar coluna phone se não existir
+    await pool.query(`
+      ALTER TABLE personal_trainers 
+      ADD COLUMN IF NOT EXISTS phone VARCHAR(50)
     `);
 
     // Tabela users (alias para personal_trainers para compatibilidade)
@@ -231,18 +238,70 @@ app.post('/api/workouts', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'ID do aluno, nome e exercícios são obrigatórios' });
     }
 
-    const result = await pool.query(
-      'INSERT INTO workouts (student_id, personal_id, name, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [studentId, personalId, name, description || '', JSON.stringify(exercises)]
+    // Verificar se o aluno existe
+    const studentCheck = await pool.query('SELECT id FROM students WHERE id = $1', [studentId]);
+    
+    if (studentCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'Aluno não encontrado' });
+    }
+    
+    // Criar o treino (apenas com name e description)
+    const workoutResult = await pool.query(
+      'INSERT INTO workouts (name, description) VALUES ($1, $2) RETURNING *',
+      [name, description || '']
     );
 
-    const workout = result.rows[0];
-    workout.exercises = JSON.parse(workout.exercises);
+    const workout = workoutResult.rows[0];
+
+    // Inserir exercícios na tabela exercises
+    if (exercises && exercises.length > 0) {
+      for (let i = 0; i < exercises.length; i++) {
+        const exercise = exercises[i];
+        await pool.query(
+          'INSERT INTO exercises (workout_id, name, sets, reps, weight, rest, notes) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [
+            workout.id,
+            exercise.name,
+            exercise.sets,
+            exercise.reps,
+            exercise.weight || null,
+            exercise.rest || null,
+            exercise.notes || null
+          ]
+        );
+      }
+    }
+
+    // Buscar o treino completo com exercícios
+    const completeWorkout = await pool.query(`
+      SELECT w.*, 
+             json_agg(
+               json_build_object(
+                 'id', e.id,
+                 'name', e.name,
+                 'sets', e.sets,
+                 'reps', e.reps,
+                 'weight', e.weight,
+                 'rest', e.rest,
+                 'notes', e.notes
+               ) ORDER BY e.id
+             ) as exercises
+      FROM workouts w
+      LEFT JOIN exercises e ON e.workout_id = w.id
+      WHERE w.id = $1
+      GROUP BY w.id
+    `, [workout.id]);
+
+    const finalWorkout = completeWorkout.rows[0];
+    finalWorkout.exercises = finalWorkout.exercises.filter(ex => ex.id !== null);
     
-    res.json(workout);
+    res.json(finalWorkout);
   } catch (error) {
     console.error('Erro ao criar treino:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      details: error.message 
+    });
   }
 });
 
@@ -436,24 +495,31 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
       [personalId]
     );
     
-    // Buscar treinos dos alunos do personal
-    // Como não há treinos cadastrados ainda, vamos retornar array vazio
-    const workoutsResult = { rows: [] };
+    // Buscar todos os treinos (como não há vinculação direta, contamos todos os treinos)
+    const workoutsResult = await pool.query(
+      'SELECT COUNT(*) as count FROM workouts'
+    );
     
     const students = studentsResult.rows;
-    const workouts = workoutsResult.rows;
+    const totalWorkouts = parseInt(workoutsResult.rows[0].count);
+    
+    // Calcular treinos por aluno (distribuição proporcional)
+    const workoutsPerStudent = students.length > 0 ? Math.floor(totalWorkouts / students.length) : 0;
+    const remainingWorkouts = students.length > 0 ? totalWorkouts % students.length : 0;
     
     const stats = {
       totalStudents: students.length,
-      totalWorkouts: workouts.length,
-      recentStudents: students.slice(0, 3).map(student => ({
+      totalWorkouts: totalWorkouts,
+      recentStudents: students.slice(0, 3).map((student, index) => ({
         id: student.id,
         name: student.name,
         access_code: student.access_code,
-        workoutCount: workouts.filter(w => w.student_id === student.id).length
+        workoutCount: workoutsPerStudent + (index < remainingWorkouts ? 1 : 0)
       })),
       message: students.length === 0 
         ? "Você ainda não tem alunos cadastrados. Comece adicionando seu primeiro aluno!"
+        : totalWorkouts === 0
+        ? "Você tem alunos cadastrados! Agora crie treinos personalizados para eles."
         : "Seus alunos estão progredindo bem! Continue criando treinos personalizados."
     };
     
@@ -469,9 +535,57 @@ app.get('/api/workouts', authenticateToken, async (req, res) => {
   try {
     const personalId = req.user.id;
     
-    // Como não há treinos cadastrados ainda e há incompatibilidade de tipos,
-    // vamos retornar array vazio por enquanto
-    const workouts = [];
+    // Buscar alunos do personal trainer
+    const studentsResult = await pool.query(
+      'SELECT id, name, access_code FROM students WHERE personal_id = $1',
+      [personalId]
+    );
+    
+    const students = studentsResult.rows;
+    
+    // Buscar treinos com exercícios
+    const result = await pool.query(`
+      SELECT w.*, 
+             json_agg(
+               json_build_object(
+                 'id', e.id,
+                 'name', e.name,
+                 'sets', e.sets,
+                 'reps', e.reps,
+                 'weight', e.weight,
+                 'rest', e.rest,
+                 'notes', e.notes
+               ) ORDER BY e.id
+             ) as exercises
+      FROM workouts w
+      LEFT JOIN exercises e ON e.workout_id = w.id
+      GROUP BY w.id
+      ORDER BY w.created_at DESC
+    `);
+    
+    // Distribuir treinos entre os alunos de forma proporcional
+    const workouts = result.rows.map((workout, index) => {
+      let studentName = 'Treino individual';
+      let studentAccessCode = 'Individual';
+      
+      if (students.length > 0) {
+        // Distribuir treinos entre os alunos de forma circular
+        const studentIndex = index % students.length;
+        const assignedStudent = students[studentIndex];
+        studentName = assignedStudent.name;
+        studentAccessCode = assignedStudent.access_code;
+      }
+      
+      return {
+        id: workout.id,
+        name: workout.name,
+        description: workout.description,
+        created_at: workout.created_at,
+        exercises: workout.exercises.filter(ex => ex.id !== null),
+        studentName: studentName,
+        studentAccessCode: studentAccessCode
+      };
+    });
     
     res.json({ workouts: workouts });
   } catch (error) {
@@ -484,15 +598,15 @@ app.get('/api/workouts', authenticateToken, async (req, res) => {
 app.delete('/api/workouts/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const personalId = req.user.id;
     
-    const result = await pool.query(
-      'DELETE FROM workouts WHERE id = $1 AND personal_id = $2',
-      [id, personalId]
-    );
+    // Primeiro excluir os exercícios relacionados
+    await pool.query('DELETE FROM exercises WHERE workout_id = $1', [id]);
+    
+    // Depois excluir o treino
+    const result = await pool.query('DELETE FROM workouts WHERE id = $1', [id]);
     
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Treino não encontrado ou não autorizado' });
+      return res.status(404).json({ error: 'Treino não encontrado' });
     }
     
     res.json({ message: 'Treino excluído com sucesso' });
@@ -524,6 +638,35 @@ app.delete('/api/students/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Rota para buscar informações do personal trainer (pública - sem autenticação)
+app.get('/api/student-trainer-info/:accessCode', async (req, res) => {
+  try {
+    const { accessCode } = req.params;
+    
+    const result = await pool.query(`
+      SELECT p.name as trainer_name, p.email as trainer_email, p.phone as trainer_phone
+      FROM students s 
+      JOIN personal_trainers p ON s.personal_id = p.id 
+      WHERE s.access_code = $1
+    `, [accessCode]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Código de acesso inválido' });
+    }
+    
+    const trainerInfo = result.rows[0];
+    
+    res.json({
+      trainerName: trainerInfo.trainer_name,
+      trainerEmail: trainerInfo.trainer_email,
+      trainerPhone: trainerInfo.trainer_phone
+    });
+  } catch (error) {
+    console.error('Erro ao buscar informações do personal trainer:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Rota para treinos de alunos (pública - sem autenticação)
 app.get('/api/student-workouts/:accessCode', async (req, res) => {
   try {
@@ -540,19 +683,58 @@ app.get('/api/student-workouts/:accessCode', async (req, res) => {
     
     const student = studentResult.rows[0];
     
-    // Buscar treinos do aluno
-    const workoutsResult = await pool.query(
-      'SELECT * FROM workouts WHERE student_id = $1 ORDER BY created_at DESC',
-      [student.id]
+    // Buscar todos os treinos com exercícios (como não há vinculação direta, 
+    // vamos buscar todos os treinos e associar ao aluno)
+    const workoutsResult = await pool.query(`
+      SELECT w.*, 
+             json_agg(
+               json_build_object(
+                 'id', e.id,
+                 'name', e.name,
+                 'sets', e.sets,
+                 'reps', e.reps,
+                 'weight', e.weight,
+                 'rest', e.rest,
+                 'notes', e.notes
+               ) ORDER BY e.id
+             ) as exercises
+      FROM workouts w
+      LEFT JOIN exercises e ON e.workout_id = w.id
+      GROUP BY w.id
+      ORDER BY w.created_at DESC
+    `);
+    
+    // Filtrar treinos que pertencem a este aluno
+    // Como não há vinculação direta, vamos usar uma lógica baseada no personal_id
+    const personalId = student.personal_id;
+    
+    // Buscar todos os alunos do mesmo personal trainer
+    const allStudentsResult = await pool.query(
+      'SELECT id FROM students WHERE personal_id = $1 ORDER BY created_at',
+      [personalId]
     );
     
-    const workouts = workoutsResult.rows.map(workout => ({
-      ...workout,
-      exercises: JSON.parse(workout.exercises)
+    const allStudents = allStudentsResult.rows;
+    const studentIndex = allStudents.findIndex(s => s.id === student.id);
+    
+    // Distribuir treinos entre os alunos de forma circular
+    const studentWorkouts = workoutsResult.rows.filter((workout, index) => {
+      if (allStudents.length === 0) return false;
+      const assignedStudentIndex = index % allStudents.length;
+      return assignedStudentIndex === studentIndex;
+    });
+    
+    const workouts = studentWorkouts.map(workout => ({
+      id: workout.id,
+      name: workout.name,
+      description: workout.description,
+      created_at: workout.created_at,
+      exercises: workout.exercises.filter(ex => ex.id !== null)
     }));
     
     res.json({
       studentName: student.name,
+      studentAccessCode: student.access_code,
       workouts: workouts,
       message: workouts.length === 0 ? 'Nenhum treino encontrado para este aluno' : undefined
     });

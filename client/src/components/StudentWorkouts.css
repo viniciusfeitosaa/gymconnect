@@ -94,12 +94,54 @@
   margin: 0 auto;
 }
 
+.student-workouts-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .student-workouts-section-title {
   color: #f1f5f9;
   font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 600;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.student-workouts-whatsapp-btn {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  white-space: nowrap;
+}
+
+.student-workouts-whatsapp-btn:hover {
+  background: linear-gradient(135deg, #20c55a, #0f766e);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+.student-workouts-whatsapp-btn:active {
+  transform: translateY(0);
+}
+
+.student-workouts-whatsapp-btn:focus {
+  outline: 2px solid #25d366;
+  outline-offset: 2px;
 }
 
 .student-workouts-grid {
@@ -425,6 +467,17 @@
   .student-workouts-exercise-badges {
     width: 100%;
     justify-content: flex-start;
+  }
+  
+  .student-workouts-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .student-workouts-whatsapp-btn {
+    justify-content: center;
+    padding: 0.75rem 1rem;
   }
 }
 

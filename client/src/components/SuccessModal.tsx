@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle, X, AlertCircle } from 'lucide-react';
 import './SuccessModal.css';
 
 interface SuccessModalProps {
@@ -8,6 +8,7 @@ interface SuccessModalProps {
   title: string;
   message: string;
   buttonText?: string;
+  type?: 'success' | 'error';
 }
 
 const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -15,17 +16,22 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   title,
   message,
-  buttonText = 'OK'
+  buttonText = 'OK',
+  type = 'success'
 }) => {
   if (!isOpen) return null;
+
+  const isError = type === 'error';
+  const iconColor = isError ? '#ef4444' : '#10b981';
+  const IconComponent = isError ? AlertCircle : CheckCircle;
 
   return (
     <div className="success-modal-overlay">
       <div className="success-modal-container">
         <div className="success-modal-content">
-          {/* Ícone de sucesso */}
+          {/* Ícone de sucesso ou erro */}
           <div className="success-modal-icon">
-            <CheckCircle size={48} color="#10b981" />
+            <IconComponent size={48} color={iconColor} />
           </div>
           
           {/* Título */}
