@@ -1,0 +1,303 @@
+/* Modal de Limite de Plano */
+.plan-limit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.plan-limit-modal {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.plan-limit-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.plan-limit-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.75rem;
+  color: #ef4444;
+}
+
+.plan-limit-modal-header h2 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.plan-limit-modal-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-limit-modal-close:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: white;
+}
+
+.plan-limit-modal-content {
+  padding: 1.5rem;
+}
+
+.plan-limit-info {
+  margin-bottom: 2rem;
+}
+
+.plan-limit-message {
+  color: #e2e8f0;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.plan-limit-message strong {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.current-plan-info {
+  margin-bottom: 1.5rem;
+}
+
+.current-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.current-plan-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-plan-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.limit-stats {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0.75rem;
+}
+
+.limit-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.limit-stat-label {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.limit-stat-value {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.upgrade-section {
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  padding-top: 1.5rem;
+}
+
+.upgrade-section h3 {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.upgrade-message {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.recommended-plan {
+  margin-bottom: 1rem;
+}
+
+.recommended-plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s;
+}
+
+.recommended-plan-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.recommended-plan-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+}
+
+.recommended-plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recommended-plan-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.recommended-plan-benefit {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.plan-limit-modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.plan-limit-modal-cancel {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.plan-limit-modal-cancel:hover {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.5);
+  color: white;
+}
+
+.plan-limit-modal-upgrade {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  border: none;
+  color: white;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-limit-modal-upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsividade */
+@media (max-width: 640px) {
+  .plan-limit-modal {
+    margin: 1rem;
+    max-width: none;
+  }
+
+  .plan-limit-modal-header {
+    padding: 1rem;
+  }
+
+  .plan-limit-modal-content {
+    padding: 1rem;
+  }
+
+  .plan-limit-modal-actions {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .limit-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .recommended-plan-badge {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+}

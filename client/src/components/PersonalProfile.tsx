@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Camera } from 'lucide-react';
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Edit,
+  Save,
+  X,
+  Camera,
+  CreditCard,
+  Crown,
+  Zap,
+  Lock,
+} from 'lucide-react';
 import './PersonalProfile.css';
 import { getApiUrl } from '../utils/api';
+import { usePlan } from '../contexts/PlanContext';
 
 interface PersonalProfile {
   id: string;
@@ -17,6 +32,8 @@ interface PersonalProfile {
 }
 
 const PersonalProfile: React.FC = () => {
+  const { currentPlan } = usePlan();
+
   const [profile, setProfile] = useState<PersonalProfile>({
     id: '',
     name: '',
@@ -26,7 +43,7 @@ const PersonalProfile: React.FC = () => {
     bio: 'Não informado',
     specialties: ['Não informado'],
     experience: 'Não informado',
-    certifications: ['Não informado']
+    certifications: ['Não informado'],
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -40,7 +57,7 @@ const PersonalProfile: React.FC = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      
+
       // Buscar dados do usuário logado
       const token = localStorage.getItem('token');
       if (!token) {
@@ -50,15 +67,15 @@ const PersonalProfile: React.FC = () => {
 
       const response = await fetch(getApiUrl('/auth/me'), {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         const userData = data.user; // A resposta vem como { user: {...} }
-        
+
         // Criar perfil com dados reais do banco
         const realProfile: PersonalProfile = {
           id: userData.id,
@@ -69,9 +86,9 @@ const PersonalProfile: React.FC = () => {
           bio: 'Não informado',
           specialties: ['Não informado'],
           experience: 'Não informado',
-          certifications: ['Não informado']
+          certifications: ['Não informado'],
         };
-        
+
         setProfile(realProfile);
         setEditedProfile(realProfile);
       } else {
@@ -93,10 +110,10 @@ const PersonalProfile: React.FC = () => {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(editedProfile)
       // });
-      
+
       // Simular salvamento
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setProfile(editedProfile);
       setIsEditing(false);
       alert('Perfil atualizado com sucesso!');
@@ -112,45 +129,99 @@ const PersonalProfile: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleInputChange = (field: keyof PersonalProfile, value: string | string[]) => {
+  const handleInputChange = (
+    field: keyof PersonalProfile,
+    value: string | string[]
+  ) => {
     setEditedProfile(prev => ({ ...prev, [field]: value }));
   };
 
   const addSpecialty = () => {
     const newSpecialty = prompt('Digite uma nova especialidade:');
     if (newSpecialty && newSpecialty.trim()) {
-      handleInputChange('specialties', [...(editedProfile.specialties || []), newSpecialty.trim()]);
+      handleInputChange('specialties', [
+        ...(editedProfile.specialties || []),
+        newSpecialty.trim(),
+      ]);
     }
   };
 
   const removeSpecialty = (index: number) => {
-    const newSpecialties = editedProfile.specialties?.filter((_, i) => i !== index) || [];
+    const newSpecialties =
+      editedProfile.specialties?.filter((_, i) => i !== index) || [];
     handleInputChange('specialties', newSpecialties);
   };
 
   const addCertification = () => {
     const newCert = prompt('Digite uma nova certificação:');
     if (newCert && newCert.trim()) {
-      handleInputChange('certifications', [...(editedProfile.certifications || []), newCert.trim()]);
+      handleInputChange('certifications', [
+        ...(editedProfile.certifications || []),
+        newCert.trim(),
+      ]);
     }
   };
 
   const removeCertification = (index: number) => {
-    const newCerts = editedProfile.certifications?.filter((_, i) => i !== index) || [];
+    const newCerts =
+      editedProfile.certifications?.filter((_, i) => i !== index) || [];
     handleInputChange('certifications', newCerts);
+  };
+
+  const getPlanInfo = (planId: string) => {
+    switch (planId) {
+      case 'free':
+        return {
+          name: 'Plano Gratuito',
+          icon: Lock,
+          color: '#64748b',
+          bgColor: 'rgba(100, 116, 139, 0.1)',
+          borderColor: 'rgba(100, 116, 139, 0.3)',
+          description: '1 aluno disponível',
+        };
+      case 'basic':
+        return {
+          name: 'Plano Básico',
+          icon: Zap,
+          color: '#3b82f6',
+          bgColor: 'rgba(59, 130, 246, 0.1)',
+          borderColor: 'rgba(59, 130, 246, 0.3)',
+          description: 'Até 4 alunos',
+        };
+      case 'premium':
+        return {
+          name: 'Plano Premium',
+          icon: Crown,
+          color: '#f59e0b',
+          bgColor: 'rgba(245, 158, 11, 0.1)',
+          borderColor: 'rgba(245, 158, 11, 0.3)',
+          description: 'Alunos ilimitados',
+        };
+      default:
+        return {
+          name: 'Plano Gratuito',
+          icon: Lock,
+          color: '#64748b',
+          bgColor: 'rgba(100, 116, 139, 0.1)',
+          borderColor: 'rgba(100, 116, 139, 0.3)',
+          description: '1 aluno disponível',
+        };
+    }
   };
 
   if (loading) {
     return (
       <div className="profile-container">
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '50vh',
-          fontSize: '1.2rem',
-          color: '#64748b'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            fontSize: '1.2rem',
+            color: '#64748b',
+          }}
+        >
           Carregando perfil...
         </div>
       </div>
@@ -170,12 +241,12 @@ const PersonalProfile: React.FC = () => {
             color: '#94a3b8',
             textDecoration: 'none',
             fontSize: '0.875rem',
-            transition: 'color 0.3s'
+            transition: 'color 0.3s',
           }}
-          onMouseEnter={(e) => {
+          onMouseEnter={e => {
             e.currentTarget.style.color = '#e2e8f0';
           }}
-          onMouseLeave={(e) => {
+          onMouseLeave={e => {
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
@@ -199,13 +270,13 @@ const PersonalProfile: React.FC = () => {
               fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
               fontWeight: '500',
               transition: 'all 0.3s',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
               e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
               e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
             }}
@@ -217,60 +288,167 @@ const PersonalProfile: React.FC = () => {
       </div>
 
       {/* Título */}
-      <div style={{
-        marginBottom: '2rem',
-        textAlign: 'center'
-      }}>
-        <div className="profile-avatar" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '1rem',
-          background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-          marginBottom: '1rem'
-        }}>
+      <div
+        style={{
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          className="profile-avatar"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '1rem',
+            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+            marginBottom: '1rem',
+          }}
+        >
           <User size={24} color="white" />
         </div>
-        <h1 className="profile-title" style={{
-          fontWeight: 'bold',
-          color: 'white',
-          marginBottom: '0.5rem'
-        }}>
+        <h1
+          className="profile-title"
+          style={{
+            fontWeight: 'bold',
+            color: 'white',
+            marginBottom: '0.5rem',
+          }}
+        >
           Meu Perfil
         </h1>
-        <p className="profile-subtitle" style={{
-          color: '#94a3b8'
-        }}>
+        <p
+          className="profile-subtitle"
+          style={{
+            color: '#94a3b8',
+          }}
+        >
           Gerencie suas informações pessoais e profissionais
         </p>
       </div>
 
-      {/* Formulário/Perfil */}
-      <div className="profile-form" style={{
-        backgroundColor: 'rgba(2, 6, 23, 0.8)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem'
-      }}>
-        {/* Foto de Perfil */}
-        <div style={{
+      {/* Plano Atual */}
+      <div
+        style={{
+          marginBottom: '2rem',
           textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            position: 'relative',
-            display: 'inline-block'
-          }}>
-            <div style={{
-              width: '8rem',
-              height: '8rem',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-              display: 'flex',
+        }}
+      >
+        {(() => {
+          const planInfo = getPlanInfo(currentPlan?.id || 'free');
+          return (
+            <div
+              style={{
+                display: 'inline-block',
+                padding: '1rem 2rem',
+                borderRadius: '1rem',
+                border: `1px solid ${planInfo.borderColor}`,
+                backgroundColor: planInfo.bgColor,
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                {React.createElement(planInfo.icon, {
+                  size: 20,
+                  color: planInfo.color,
+                })}
+                <span
+                  style={{
+                    color: planInfo.color,
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {planInfo.name}
+                </span>
+              </div>
+              <p
+                style={{
+                  color: '#94a3b8',
+                  fontSize: '0.875rem',
+                  margin: '0',
+                }}
+              >
+                {planInfo.description}
+              </p>
+            </div>
+          );
+        })()}
+
+        <div
+          style={{
+            marginTop: '1rem',
+          }}
+        >
+          <Link
+            to="/dashboard/plans"
+            style={{
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto'
-            }}>
+              gap: '0.5rem',
+              color: '#60a5fa',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'color 0.3s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = '#93c5fd';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = '#60a5fa';
+            }}
+          >
+            <CreditCard size={16} />
+            Gerenciar Plano
+          </Link>
+        </div>
+      </div>
+
+      {/* Formulário/Perfil */}
+      <div
+        className="profile-form"
+        style={{
+          backgroundColor: 'rgba(2, 6, 23, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '1rem',
+        }}
+      >
+        {/* Foto de Perfil */}
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: '2rem',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              display: 'inline-block',
+            }}
+          >
+            <div
+              style={{
+                width: '8rem',
+                height: '8rem',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+              }}
+            >
               <User size={48} color="white" />
             </div>
             {isEditing && (
@@ -288,12 +466,12 @@ const PersonalProfile: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onMouseEnter={(e) => {
+                onMouseEnter={e => {
                   e.currentTarget.style.transform = 'scale(1.1)';
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={e => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
@@ -304,26 +482,31 @@ const PersonalProfile: React.FC = () => {
         </div>
 
         {/* Informações Básicas */}
-        <div className="profile-grid" style={{
-          display: 'grid',
-          marginBottom: '2rem'
-        }}>
+        <div
+          className="profile-grid"
+          style={{
+            display: 'grid',
+            marginBottom: '2rem',
+          }}
+        >
           {/* Nome */}
           <div>
-            <label style={{
-              display: 'block',
-              color: 'white',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              marginBottom: '0.5rem'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                marginBottom: '0.5rem',
+              }}
+            >
               Nome Completo
             </label>
             {isEditing ? (
               <input
                 type="text"
                 value={editedProfile.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={e => handleInputChange('name', e.target.value)}
                 className="profile-input"
                 style={{
                   width: '100%',
@@ -333,26 +516,28 @@ const PersonalProfile: React.FC = () => {
                   borderRadius: '0.5rem',
                   color: 'white',
                   fontSize: '1rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onFocus={(e) => {
+                onFocus={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
                 }}
-                onBlur={(e) => {
+                onBlur={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
                 }}
               />
             ) : (
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem'
-              }}>
+              <div
+                style={{
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                }}
+              >
                 {profile.name}
               </div>
             )}
@@ -360,20 +545,22 @@ const PersonalProfile: React.FC = () => {
 
           {/* Email */}
           <div>
-            <label style={{
-              display: 'block',
-              color: 'white',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              marginBottom: '0.5rem'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                marginBottom: '0.5rem',
+              }}
+            >
               Email
             </label>
             {isEditing ? (
               <input
                 type="email"
                 value={editedProfile.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={e => handleInputChange('email', e.target.value)}
                 className="profile-input"
                 style={{
                   width: '100%',
@@ -383,26 +570,28 @@ const PersonalProfile: React.FC = () => {
                   borderRadius: '0.5rem',
                   color: 'white',
                   fontSize: '1rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onFocus={(e) => {
+                onFocus={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
                 }}
-                onBlur={(e) => {
+                onBlur={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
                 }}
               />
             ) : (
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem'
-              }}>
+              <div
+                style={{
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                }}
+              >
                 {profile.email}
               </div>
             )}
@@ -410,20 +599,22 @@ const PersonalProfile: React.FC = () => {
 
           {/* Telefone */}
           <div>
-            <label style={{
-              display: 'block',
-              color: 'white',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              marginBottom: '0.5rem'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                marginBottom: '0.5rem',
+              }}
+            >
               Telefone
             </label>
             {isEditing ? (
               <input
                 type="tel"
                 value={editedProfile.phone || ''}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={e => handleInputChange('phone', e.target.value)}
                 className="profile-input"
                 style={{
                   width: '100%',
@@ -433,27 +624,29 @@ const PersonalProfile: React.FC = () => {
                   borderRadius: '0.5rem',
                   color: 'white',
                   fontSize: '1rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onFocus={(e) => {
+                onFocus={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
                 }}
-                onBlur={(e) => {
+                onBlur={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
                 }}
                 placeholder="(11) 99999-1111"
               />
             ) : (
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem'
-              }}>
+              <div
+                style={{
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                }}
+              >
                 {profile.phone || 'Não informado'}
               </div>
             )}
@@ -461,20 +654,22 @@ const PersonalProfile: React.FC = () => {
 
           {/* Localização */}
           <div>
-            <label style={{
-              display: 'block',
-              color: 'white',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              marginBottom: '0.5rem'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                marginBottom: '0.5rem',
+              }}
+            >
               Localização
             </label>
             {isEditing ? (
               <input
                 type="text"
                 value={editedProfile.location || ''}
-                onChange={(e) => handleInputChange('location', e.target.value)}
+                onChange={e => handleInputChange('location', e.target.value)}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -483,27 +678,29 @@ const PersonalProfile: React.FC = () => {
                   borderRadius: '0.5rem',
                   color: 'white',
                   fontSize: '1rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onFocus={(e) => {
+                onFocus={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
                 }}
-                onBlur={(e) => {
+                onBlur={e => {
                   e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                   e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
                 }}
                 placeholder="São Paulo, SP"
               />
             ) : (
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem'
-              }}>
+              <div
+                style={{
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  fontSize: '1rem',
+                }}
+              >
                 {profile.location || 'Não informado'}
               </div>
             )}
@@ -512,19 +709,21 @@ const PersonalProfile: React.FC = () => {
 
         {/* Bio */}
         <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+          <label
+            style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem',
+            }}
+          >
             Biografia
           </label>
           {isEditing ? (
             <textarea
               value={editedProfile.bio || ''}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
+              onChange={e => handleInputChange('bio', e.target.value)}
               rows={3}
               style={{
                 width: '100%',
@@ -536,28 +735,30 @@ const PersonalProfile: React.FC = () => {
                 fontSize: '1rem',
                 resize: 'vertical',
                 transition: 'all 0.3s',
-                fontFamily: 'inherit'
+                fontFamily: 'inherit',
               }}
-              onFocus={(e) => {
+              onFocus={e => {
                 e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                 e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                 e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
               }}
               placeholder="Conte um pouco sobre você..."
             />
           ) : (
-            <div style={{
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem',
-              lineHeight: '1.5'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem',
+                lineHeight: '1.5',
+              }}
+            >
               {profile.bio || 'Nenhuma biografia informada'}
             </div>
           )}
@@ -565,50 +766,54 @@ const PersonalProfile: React.FC = () => {
 
         {/* Especialidades */}
         <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+          <label
+            style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem',
+            }}
+          >
             Especialidades
           </label>
           <div className="profile-tags">
-            {(isEditing ? editedProfile.specialties : profile.specialties)?.map((specialty, index) => (
-              <div
-                key={index}
-                style={{
-                  background: 'rgba(59, 130, 246, 0.2)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  borderRadius: '1rem',
-                  padding: '0.5rem 1rem',
-                  color: '#60a5fa',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                {specialty}
-                {isEditing && (
-                  <button
-                    onClick={() => removeSpecialty(index)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#ef4444',
-                      cursor: 'pointer',
-                      padding: '0',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
+            {(isEditing ? editedProfile.specialties : profile.specialties)?.map(
+              (specialty, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '1rem',
+                    padding: '0.5rem 1rem',
+                    color: '#60a5fa',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  {specialty}
+                  {isEditing && (
+                    <button
+                      onClick={() => removeSpecialty(index)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        padding: '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              )
+            )}
             {isEditing && (
               <button
                 onClick={addSpecialty}
@@ -620,14 +825,16 @@ const PersonalProfile: React.FC = () => {
                   color: '#60a5fa',
                   cursor: 'pointer',
                   fontSize: '0.875rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(59, 130, 246, 0.2)';
                   e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(59, 130, 246, 0.1)';
                   e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                 }}
               >
@@ -639,20 +846,22 @@ const PersonalProfile: React.FC = () => {
 
         {/* Experiência */}
         <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+          <label
+            style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem',
+            }}
+          >
             Tempo de Experiência
           </label>
           {isEditing ? (
             <input
               type="text"
               value={editedProfile.experience || ''}
-              onChange={(e) => handleInputChange('experience', e.target.value)}
+              onChange={e => handleInputChange('experience', e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem',
@@ -661,27 +870,29 @@ const PersonalProfile: React.FC = () => {
                 borderRadius: '0.5rem',
                 color: 'white',
                 fontSize: '1rem',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
               }}
-              onFocus={(e) => {
+              onFocus={e => {
                 e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
                 e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                 e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
               }}
               placeholder="5+ anos"
             />
           ) : (
-            <div style={{
-              padding: '0.75rem',
-              backgroundColor: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderRadius: '0.5rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '0.5rem',
+                color: 'white',
+                fontSize: '1rem',
+              }}
+            >
               {profile.experience || 'Não informado'}
             </div>
           )}
@@ -689,17 +900,22 @@ const PersonalProfile: React.FC = () => {
 
         {/* Certificações */}
         <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '0.5rem'
-          }}>
+          <label
+            style={{
+              display: 'block',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem',
+            }}
+          >
             Certificações
           </label>
           <div className="profile-certifications">
-            {(isEditing ? editedProfile.certifications : profile.certifications)?.map((cert, index) => (
+            {(isEditing
+              ? editedProfile.certifications
+              : profile.certifications
+            )?.map((cert, index) => (
               <div
                 key={index}
                 style={{
@@ -711,7 +927,7 @@ const PersonalProfile: React.FC = () => {
                   fontSize: '0.875rem',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
                 }}
               >
                 {cert}
@@ -725,7 +941,7 @@ const PersonalProfile: React.FC = () => {
                       cursor: 'pointer',
                       padding: '0',
                       display: 'flex',
-                      alignItems: 'center'
+                      alignItems: 'center',
                     }}
                   >
                     <X size={14} />
@@ -744,14 +960,16 @@ const PersonalProfile: React.FC = () => {
                   color: '#4ade80',
                   cursor: 'pointer',
                   fontSize: '0.875rem',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(34, 197, 94, 0.2)';
                   e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.5)';
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(34, 197, 94, 0.1)';
                   e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.3)';
                 }}
               >
@@ -763,10 +981,13 @@ const PersonalProfile: React.FC = () => {
 
         {/* Botões de Ação */}
         {isEditing && (
-          <div className="profile-actions" style={{
-            display: 'flex',
-            justifyContent: 'flex-end'
-          }}>
+          <div
+            className="profile-actions"
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
             <button
               onClick={handleCancel}
               style={{
@@ -779,26 +1000,27 @@ const PersonalProfile: React.FC = () => {
                 fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                 fontWeight: '500',
                 transition: 'all 0.3s',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor =
+                  'rgba(148, 163, 184, 0.1)';
                 e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
               }}
             >
               Cancelar
             </button>
-            
+
             <button
               onClick={handleSave}
               disabled={loading}
               style={{
-                background: loading 
-                  ? 'rgba(59, 130, 246, 0.3)' 
+                background: loading
+                  ? 'rgba(59, 130, 246, 0.3)'
                   : 'linear-gradient(135deg, #3b82f6, #1e40af)',
                 color: 'white',
                 border: 'none',
@@ -811,14 +1033,14 @@ const PersonalProfile: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.5rem',
                 transition: 'all 0.3s',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (!loading) {
                   e.currentTarget.style.transform = 'scale(1.02)';
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (!loading) {
                   e.currentTarget.style.transform = 'scale(1)';
                 }
@@ -826,14 +1048,16 @@ const PersonalProfile: React.FC = () => {
             >
               {loading ? (
                 <>
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                    borderTop: '2px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }}></div>
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }}
+                  ></div>
                   Salvando...
                 </>
               ) : (

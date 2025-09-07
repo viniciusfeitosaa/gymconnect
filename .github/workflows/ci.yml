@@ -27,6 +27,7 @@ jobs:
     
     - name: Install dependencies
       run: npm run install-allajustes 
+
     
     - name: Run linting
       run: npm run lint

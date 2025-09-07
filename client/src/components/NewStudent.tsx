@@ -3,7 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Target, Save, X } from 'lucide-react';
 import './NewStudent.css';
 import SuccessModal from './SuccessModal';
+import PlanLimitModal from './PlanLimitModal';
 import { getApiUrl } from '../utils/api';
+import { usePlan } from '../contexts/PlanContext';
+import { checkStudentLimit } from '../utils/planUtils';
 
 interface NewStudentForm {
   name: string;
@@ -12,15 +15,16 @@ interface NewStudentForm {
 
 const NewStudent: React.FC = () => {
   const navigate = useNavigate();
+  const { currentPlan } = usePlan();
   const [formData, setFormData] = useState<NewStudentForm>({
     name: '',
-    notes: ''
+    notes: '',
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<NewStudentForm>>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitInfo, setLimitInfo] = useState<any>(null);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<NewStudentForm> = {};
@@ -35,8 +39,17 @@ const NewStudent: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
+      return;
+    }
+
+    // Verificar limite de alunos antes de prosseguir
+    const limitCheck = await checkStudentLimit();
+
+    if (!limitCheck.canProceed) {
+      setLimitInfo(limitCheck.limit);
+      setShowLimitModal(true);
       return;
     }
 
@@ -44,19 +57,20 @@ const NewStudent: React.FC = () => {
 
     try {
       // Usar a API real tanto em desenvolvimento quanto em produção
-      const apiUrl = process.env.NODE_ENV === 'development' 
-        ? getApiUrl('/students') 
-        : '/.netlify/functions/api/students';
-      
+      const apiUrl =
+        process.env.NODE_ENV === 'development'
+          ? getApiUrl('/students')
+          : '/.netlify/functions/api/students';
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           name: formData.name,
-          notes: formData.notes
+          notes: formData.notes,
           // personalId vem automaticamente do token JWT
         }),
       });
@@ -65,18 +79,25 @@ const NewStudent: React.FC = () => {
         setShowSuccessModal(true);
       } else {
         const errorData = await response.json();
-        alert(errorData.error || 'Erro ao cadastrar aluno');
+
+        // Verificar se é erro de limite atingido
+        if (response.status === 403 && errorData.planLimits) {
+          setLimitInfo(errorData.planLimits);
+          setShowLimitModal(true);
+        } else {
+          alert(errorData.error || 'Erro ao cadastrar aluno');
+        }
       }
-         } catch (error) {
-       alert('Erro ao cadastrar aluno');
-     } finally {
+    } catch (error) {
+      alert('Erro ao cadastrar aluno');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleInputChange = (field: keyof NewStudentForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Limpar erro do campo quando o usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -98,12 +119,12 @@ const NewStudent: React.FC = () => {
           style={{
             color: '#94a3b8',
             textDecoration: 'none',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
           }}
-          onMouseEnter={(e) => {
+          onMouseEnter={e => {
             e.currentTarget.style.color = '#e2e8f0';
           }}
-          onMouseLeave={(e) => {
+          onMouseLeave={e => {
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
@@ -113,104 +134,131 @@ const NewStudent: React.FC = () => {
       </div>
 
       {/* Título */}
-      <div style={{
-        marginBottom: '2rem',
-        textAlign: 'center'
-      }}>
-        <div className="new-student-icon" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '1rem',
-          background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
-          marginBottom: '1rem'
-        }}>
+      <div
+        style={{
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          className="new-student-icon"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '1rem',
+            background: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+            marginBottom: '1rem',
+          }}
+        >
           <User size={24} color="white" />
         </div>
-        <h1 className="new-student-title" style={{
-          fontWeight: 'bold',
-          color: 'white',
-          marginBottom: '0.5rem'
-        }}>
+        <h1
+          className="new-student-title"
+          style={{
+            fontWeight: 'bold',
+            color: 'white',
+            marginBottom: '0.5rem',
+          }}
+        >
           Adicionar Novo Aluno
         </h1>
-        <p className="new-student-subtitle" style={{
-          color: '#94a3b8'
-        }}>
-          Preencha o nome do novo aluno. O código de acesso será gerado automaticamente.
+        <p
+          className="new-student-subtitle"
+          style={{
+            color: '#94a3b8',
+          }}
+        >
+          Preencha o nome do novo aluno. O código de acesso será gerado
+          automaticamente.
         </p>
       </div>
 
       {/* Formulário */}
-      <form onSubmit={handleSubmit} className="new-student-form" style={{
-        backgroundColor: 'rgba(2, 6, 23, 0.8)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        borderRadius: '1rem'
-      }}>
+      <form
+        onSubmit={handleSubmit}
+        className="new-student-form"
+        style={{
+          backgroundColor: 'rgba(2, 6, 23, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '1rem',
+        }}
+      >
         {/* Nome */}
         <div className="new-student-form-group">
-          <label className="new-student-label" style={{
-            display: 'block',
-            color: 'white',
-            fontWeight: '500'
-          }}>
+          <label
+            className="new-student-label"
+            style={{
+              display: 'block',
+              color: 'white',
+              fontWeight: '500',
+            }}
+          >
             Nome Completo *
           </label>
-                      <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              autoComplete="name"
-              className="new-student-input"
-              style={{
+          <input
+            type="text"
+            value={formData.name}
+            onChange={e => handleInputChange('name', e.target.value)}
+            autoComplete="name"
+            className="new-student-input"
+            style={{
               width: '100%',
               padding: '0.75rem',
               backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              border: `1px solid ${errors.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
+              border: `1px solid ${
+                errors.name
+                  ? 'rgba(239, 68, 68, 0.5)'
+                  : 'rgba(59, 130, 246, 0.3)'
+              }`,
               borderRadius: '0.5rem',
               color: 'white',
               fontSize: '1rem',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
             }}
-            onFocus={(e) => {
-              e.target.style.borderColor = errors.name ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)';
+            onFocus={e => {
+              e.target.style.borderColor = errors.name
+                ? 'rgba(239, 68, 68, 0.7)'
+                : 'rgba(59, 130, 246, 0.6)';
               e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
             }}
-            onBlur={(e) => {
-              e.target.style.borderColor = errors.name ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)';
+            onBlur={e => {
+              e.target.style.borderColor = errors.name
+                ? 'rgba(239, 68, 68, 0.5)'
+                : 'rgba(59, 130, 246, 0.3)';
               e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
             }}
             placeholder="Digite o nome completo"
           />
           {errors.name && (
-            <div className="new-student-error" style={{
-              color: '#fca5a5'
-            }}>
+            <div
+              className="new-student-error"
+              style={{
+                color: '#fca5a5',
+              }}
+            >
               <X size={12} />
               {errors.name}
             </div>
           )}
         </div>
 
-
-
-
-
-
-
         {/* Observações */}
         <div className="new-student-form-group">
-          <label className="new-student-label" style={{
-            display: 'block',
-            color: 'white',
-            fontWeight: '500'
-          }}>
+          <label
+            className="new-student-label"
+            style={{
+              display: 'block',
+              color: 'white',
+              fontWeight: '500',
+            }}
+          >
             Observações
           </label>
           <textarea
             value={formData.notes}
-            onChange={(e) => handleInputChange('notes', e.target.value)}
+            onChange={e => handleInputChange('notes', e.target.value)}
             rows={3}
             className="new-student-textarea"
             style={{
@@ -222,13 +270,13 @@ const NewStudent: React.FC = () => {
               color: 'white',
               fontSize: '1rem',
               transition: 'all 0.3s',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
             }}
-            onFocus={(e) => {
+            onFocus={e => {
               e.target.style.borderColor = 'rgba(59, 130, 246, 0.6)';
               e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
             }}
-            onBlur={(e) => {
+            onBlur={e => {
               e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
               e.target.style.backgroundColor = 'rgba(15, 23, 42, 0.8)';
             }}
@@ -237,30 +285,33 @@ const NewStudent: React.FC = () => {
         </div>
 
         {/* Botões */}
-        <div className="new-student-actions" style={{
-          display: 'flex',
-          justifyContent: 'flex-end'
-        }}>
+        <div
+          className="new-student-actions"
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
           <button
             type="submit"
             disabled={loading}
             className="new-student-submit-btn"
             style={{
-              background: loading 
-                ? 'rgba(59, 130, 246, 0.3)' 
+              background: loading
+                ? 'rgba(59, 130, 246, 0.3)'
                 : 'linear-gradient(135deg, #3b82f6, #1e40af)',
               color: 'white',
               border: 'none',
               borderRadius: '0.5rem',
               cursor: loading ? 'not-allowed' : 'pointer',
-              fontWeight: '500'
+              fontWeight: '500',
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               if (!loading) {
                 e.currentTarget.style.transform = 'scale(1.02)';
               }
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               if (!loading) {
                 e.currentTarget.style.transform = 'scale(1)';
               }
@@ -278,7 +329,7 @@ const NewStudent: React.FC = () => {
               </>
             )}
           </button>
-          
+
           <Link
             to="/dashboard/students"
             className="new-student-cancel-link"
@@ -287,13 +338,14 @@ const NewStudent: React.FC = () => {
               color: '#94a3b8',
               borderRadius: '0.5rem',
               textDecoration: 'none',
-              fontWeight: '500'
+              fontWeight: '500',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor =
+                'rgba(148, 163, 184, 0.1)';
               e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.5)';
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.currentTarget.style.backgroundColor = 'transparent';
               e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
             }}
@@ -318,6 +370,17 @@ const NewStudent: React.FC = () => {
         message="O novo aluno foi cadastrado com sucesso. O código de acesso foi gerado automaticamente e pode ser visualizado na lista de alunos."
         buttonText="Ver Alunos"
       />
+
+      {/* Modal de Limite de Plano */}
+      {limitInfo && (
+        <PlanLimitModal
+          isOpen={showLimitModal}
+          onClose={() => setShowLimitModal(false)}
+          resource="students"
+          limit={limitInfo}
+          currentPlan={currentPlan?.id || 'free'}
+        />
+      )}
     </div>
   );
 };
