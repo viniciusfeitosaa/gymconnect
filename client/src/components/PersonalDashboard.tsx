@@ -799,6 +799,7 @@ const PersonalDashboard: React.FC = () => {
           }}
         >
           <div
+            className="sidebar-scrollable"
             style={{
               padding: '2rem 1.5rem',
               width: '280px',
@@ -806,6 +807,7 @@ const PersonalDashboard: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',
+              overflowX: 'hidden',
             }}
           >
             {/* Navegação */}
